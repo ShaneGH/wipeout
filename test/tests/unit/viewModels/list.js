@@ -31,7 +31,9 @@ testUtils.testWithUtils("constructor", "", false, function(methods, classes, sub
 testUtils.testWithUtils("constructor", "item template change", false, function(methods, classes, subject, invoker) {
     // arrange
 	subject = new wipeout.viewModels.list();
-	var vm1 = {}, vm2 = {__createdBylist: true}, template = wipeout.viewModels.content.createAnonymousTemplate("hello");
+	var vm1 = {}, 
+        template = wipeout.viewModels.content.createAnonymousTemplate("hello"),
+        vm2 = {__createdBylist: true, synchronusTemplateChange: function (){this.templateId = arguments[0];}};
 	subject.getItemViewModels = function () { return [vm1, vm2]; };
 	
 	// assert
