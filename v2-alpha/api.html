@@ -1128,6 +1128,40 @@ Renders:
 </p>
 </script>
 
+<script id="Articles.create-an-anonymous-template-property" type="text/template">
+<wipeout-docs.view-models.components.versioned version="2.1">
+    <content-template>
+        <h1>Create an anonymous template property</h1>
+        <p>You may wish to define view models which can accept anonymous templates (or template strings) and convert them to a template id, such is with the <code>set-template</code> property of the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=content'" text="'wo.content'"></wipeout-docs.rl> control. You can do this with the <code>templateProperty</code> function.</p>
+
+        Define the view model
+        <wipeout-docs.view-models.components.j-code-block highlight--s="templateProperty">
+            <code parser="s">// build a view model with an anonymous template property (theTemplate)
+wo.viewModel("demoApp.myType", wo.content)
+    .templateProperty("theTemplate")
+    .build();</code>
+        </wipeout-docs.view-models.components.j-code-block>
+
+        Use the view model
+        <wipeout-docs.view-models.components.new-template-code-block new-script-id="'anonymous-t-prop-1'" highlight--s="theTemplateId">
+            <code parser="s">&lt;demo-app.my-type>
+    &lt;the-template>
+        Hello Wipeout!
+    &lt;/the-template>
+    &lt;set-template>
+        &lt;wo.view template-id="$this.theTemplateId">&lt;/wo.view>
+    &lt;/set-template>
+&lt;/demo-app.my-type></code>
+            </wipeout-docs.view-models.components.new-template-code-block>
+
+        Result:
+        <wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
+            <code parser="s">&lt;wo.view template-id="'anonymous-t-prop-1'" /></code>
+        </wipeout-docs.view-models.components.usage-code-block>
+    </content-template>
+</wipeout-docs.view-models.components.versioned>
+</script>
+
 <script id="Articles.custom-binding" type="text/template">
 <h1>Writing a custom binding</h1>
 

@@ -1642,7 +1642,8 @@ compiler.registerClass("wipeoutDocs.models.howDoIApplication", "orienteer", func
                 new articleLink("Add Computed Values", "add-compued-values"),
                 new articleLink("Add a property binding", "add-a-property-binding"),
                 new articleLink("Add a property parser", "add-a-parser"),
-                new articleLink("Inherit from another viewModel", "inherit-from-another-view-model")
+                new articleLink("Inherit from another viewModel", "inherit-from-another-view-model"),
+                new articleLink("Create an anonymous template property", "create-an-anonymous-template-property")
             ]
         }, {        
             header: new articleLink("Use the model layer", "models"),
