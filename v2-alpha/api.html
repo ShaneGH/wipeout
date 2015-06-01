@@ -4604,7 +4604,7 @@ without breaking anything you wouldn't expect to break in javascript.</p>
         <h3><code>data-wo-foreach="value"</code></h3>
         <p>The foreach attribute renders the content of an element only if the content of the attribue evaluates to true.</p>
         <p>The <code>foreach</code> attribute wraps an <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'list view model'"></wipeout-docs.rl>, which can be used if you also need to define a more complex template.</p>
-        <wipeout-docs.view-models.components.new-template-code-block new-script-id="'wo-foreach-attr'" highlight--s="wo-if">
+        <wipeout-docs.view-models.components.new-template-code-block new-script-id="'wo-foreach-attr'" highlight--s="wo-foreach">
             <code parser="s">&lt;wo.content model="['Item 1', 'Item 2']">
     &lt;set-template>
         &lt;ul wo-foreach="$model">
@@ -4965,10 +4965,12 @@ without breaking anything you wouldn't expect to break in javascript.</p>
 </script>
 
 <script id="Articles.working-with-lists" type="text/template">
-<h1>Working with lists</h1>
+<wipeout-docs.view-models.components.versioned version="2.1">
+    <content-template>
+        <h1>Working with lists</h1>
 
-<p>The simplest way to handle lists is with the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-foreach'" text="'foreach'"></wipeout-docs.rl> attribute. Foreach creates a new view model for each item in the attribute and adds the item as the model of the created view model.</p>
-<wipeout-docs.view-models.components.new-template-code-block new-script-id="'working-with-lists-example-1'" highlight--s="wo-foreach">
+        <p>The simplest way to handle lists is with the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-foreach'" text="'foreach'"></wipeout-docs.rl> attribute. Foreach creates a new view model for each item in the attribute and adds the item as the model of the created view model.</p>
+        <wipeout-docs.view-models.components.new-template-code-block new-script-id="'working-with-lists-example-1'" highlight--s="wo-foreach">
             <code parser="s">&lt;wo.content model="['Item 1', 'Item 2']">
     &lt;set-template>
         &lt;ul wo-foreach="$model">
@@ -4981,7 +4983,9 @@ without breaking anything you wouldn't expect to break in javascript.</p>
         <wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
             <code parser="s">&lt;wo.view template-id="'working-with-lists-example-1'">&lt;/wo.view></code>
         </wipeout-docs.view-models.components.usage-code-block> 
-<p>The <code>foreach</code> attribure wraps the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'wo.list'"></wipeout-docs.rl> view model which can handle more complex situations.</p>
+        <p>The <code>foreach</code> attribure wraps the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'wo.list'"></wipeout-docs.rl> view model which can handle more complex situations.</p>
+    </content-template>
+</wipeout-docs.view-models.components.versioned>
 </script>
 
 <script id="wipeoutDocs.viewModels.apiApplication" type="text/template">
