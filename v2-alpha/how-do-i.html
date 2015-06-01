@@ -3007,9 +3007,7 @@ Usage:
 <wipeout-docs.view-models.components.new-template-code-block new-script-id--s="list-template-script-1">
     <code parser="s">&lt;wo.list items="['Hello wipeout 1', 'Hello wipeout 2']">
     &lt;set-template>
-        &lt;ul>
-            {{$this.items}}
-        &lt;/ul>
+        &lt;ul wo-render="$this.items">&lt;/ul>
     &lt;/set-template>
     &lt;item-template>
         &lt;li>
