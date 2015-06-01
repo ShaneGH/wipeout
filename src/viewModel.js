@@ -87,7 +87,7 @@ function viewModel (name, extend, doNotWarn) {
 "			values[i];\n" +
 "\n" +
 "	if (viewModelLifecycle.onInitialized)\n" +
-"		(this.$onInitialized || (this.$onInitialized = [])).push(viewModelLifecycle.onInitialized);\n" +
+"		Array.prototype.push.apply((this.$onInitialized || (this.$onInitialized = [])), viewModelLifecycle.onInitialized);\n" +
 "	if (viewModelLifecycle.onRendered)\n" +
 "		(this.$onRendered || (this.$onRendered = [])).push(viewModelLifecycle.onRendered);\n" +
 "	if (viewModelLifecycle.onUnrendered)\n" +
@@ -238,14 +238,34 @@ function viewModel (name, extend, doNotWarn) {
 			return output;
 		},
         
+        templateProperty: function (propertyName) {
+			///<summary>Create an anonymous template property which will be bound to {{propertyName}}Id</summary>
+			///<param name="propertyName" type="String">The name of the template property</param>
+			///<returns type="Object">The view model builder</returns>
+            
+            return this.parser(propertyName, "template")
+                .binding(propertyName, "templateProperty")
+                .initialize(function () {
+                    wipeout.viewModels.content.createTemplatePropertyFor(this, propertyName + "Id", propertyName);
+                });
+        },
+        
         // binding strategies
         onlyBindObservables: function () {
+			///<summary>Use the onlyBindObservables binding strategy for this view model</summary>
+			///<returns type="Object">The view model builder</returns>
+            
             return this.value("$bindingStrategy", wipeout.settings.bindingStrategies.onlyBindObservables);
         },
         bindNonObservables: function () {
+			///<summary>Use the bindNonObservables binding strategy for this view model</summary>
+			///<returns type="Object">The view model builder</returns>
             return this.value("$bindingStrategy", wipeout.settings.bindingStrategies.bindNonObservables);
         },
         createObservables: function () {
+			///<summary>Use the createObservables binding strategy for this view model</summary>
+			///<returns type="Object">The view model builder</returns>
+            
             return this.value("$bindingStrategy", wipeout.settings.bindingStrategies.createObservables);
         },
 
@@ -268,8 +288,8 @@ function viewModel (name, extend, doNotWarn) {
 			
 			if (!isViewModel) throw "The parent class must be, or inherit from wo.view to use this method.";
 			
-			if (viewModelLifecycle.onInitialized) throw "onInitialized has been defined already";
-			viewModelLifecycle.onInitialized = onInitialized; 
+			if (!viewModelLifecycle.onInitialized) viewModelLifecycle.onInitialized = [];
+			viewModelLifecycle.onInitialized.push(onInitialized); 
 			
 			return output;
 		},

@@ -168,9 +168,10 @@ test("convenience methods", function() {
 		}
 	};
 	
-	var builder = wo.viewModel("vms.test");
+	var builder = wo.viewModel("vms.test"), f;
 	for (var i in functions)
 		builder[i](functions[i]);
+    builder.initialize(f = function(){});
 	
 	builder.templateId(123);
 	
@@ -178,8 +179,9 @@ test("convenience methods", function() {
 	var subject = new (builder.build().statics)();
 
 	// assert
-    strictEqual(subject["$onInitialized"].length, 1);
+    strictEqual(subject["$onInitialized"].length, 2);
     strictEqual(subject["$onInitialized"][0], functions.initialize);
+    strictEqual(subject["$onInitialized"][1], f);
     strictEqual(subject["$onRendered"].length, 1);
     strictEqual(subject["$onRendered"][0], functions.rendered);
     strictEqual(subject["$onUnrendered"].length, 1);
@@ -205,6 +207,7 @@ testUtils.testWithUtils("dispose", null, false, function(methods, classes, subje
 test("global binding/parser", function() {
 	// arrange	
 	// act
+    
 	var vm = wo.viewModel("vms.test")
 		.binding("bla", "tw")
 		.parser("bla", "s").build();
@@ -212,4 +215,32 @@ test("global binding/parser", function() {
 	// assert
 	strictEqual(vm.getGlobalBindingType("bla"), "tw");
 	strictEqual(vm.getGlobalParser("bla"), wipeout.template.initialization.parsers.s);
+});
+
+test("templateProperty", function() {
+	// arrange
+    integrationTestSetup();
+    
+    var vm = wo.viewModel("vms.test", wo.content)
+        .templateProperty("theTemplate")
+        .build();
+    
+	// act
+    application.setTemplate = '<vms.test>\
+    <the-template>\
+        <div id="thetemplatediv"></div>\
+    </the-template>\
+    <set-template>\
+        <wo.view template-id="$this.theTemplateId"></wo.view>\
+    </set-template>\
+</cms.test>';
+
+	// assert
+    application.onRendered = function () {
+        ok(document.getElementById("thetemplatediv"));
+        integrationTestTeardown();
+        start();
+    };
+    
+    stop();
 });
