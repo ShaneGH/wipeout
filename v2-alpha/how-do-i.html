@@ -743,7 +743,7 @@ By default, all bindings are one way. This means that the object where the prope
         <li><code>$parent</code> references view model 1 level up</li>
         <li><code>$parents</code> is an array of all view model ancestors where <code>$parents[0] === $parent</code>.</li>
         <li><code>$parentContext</code> is the binding context of the <code>$parent</code>.</li>
-        <li><code>$index.value</code> is available to items in an <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=working-with-lists'" text--s="list"></wipeout-docs.rl> and represents their index in the array.</li>
+        <li><code>$index.value</code> is available to items in an <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text--s="list"></wipeout-docs.rl> and represents their index in the array.</li>
         <li><wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=bind-to-ancestor'" text--s="$context.find(...)"></wipeout-docs.rl> is a tool to find ancestors based on search terms.</li>
     </ul>
     </p>
@@ -2228,7 +2228,7 @@ If you like OOP, check out the docs <a href="https://github.com/ShaneGH/orientee
 <h1>Pluggable MVVM components</h1>
 
 <p>Expanding on the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=get-started-with-mvvm-interactions'" text="'previous article'"></wipeout-docs.rl>, MVVM screams componentization. Wipeout has a few view model types for basic scenarios, and you can also create your own.</p>
-<p>In this example we will use the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=working-with-lists'" text="'list'"></wipeout-docs.rl> component to render the person names in a <code>&amp;lt;ul></code>. You can set properties of a nested component within the template.</p>
+<p>In this example we will use the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'list'"></wipeout-docs.rl> component to render the person names in a <code>&amp;lt;ul></code>. You can set properties of a nested component within the template.</p>
 <wipeout-docs.view-models.components.code-block highlight="['$model.people', 'list']">
     <code parser="s">&lt;div>
     &lt;button wo-click="$this.toggleVisibility">Toggle&lt;/button>
@@ -2855,7 +2855,7 @@ and so on. It is best practice only to refer to parents in the current template 
 </script>
 
 <script id="Articles.list-custom-items" type="text/template">
-<h1>Using custom items control items</h1>
+<h1>Using custom list items</h1>
 
 <p>
 With a custom list you can control the types of items which are created by overriding the 
@@ -2987,7 +2987,7 @@ Usage:
 <script id="Articles.list-self-removing-items" type="text/template">
 <h1>Self removing items</h1>
 
-<p>All items controls subscribe to the <wipeout-docs.rl href="'/wipeout/v2-alpha/api.html?type=api&amp;className=wo.list&amp;propertyName=removeItem&amp;isStatic=true'" text="'removeItem'"></wipeout-docs.rl>
+<p>All lists subscribe to the <wipeout-docs.rl href="'/wipeout/v2-alpha/api.html?type=api&amp;className=wo.list&amp;propertyName=removeItem&amp;isStatic=true'" text="'removeItem'"></wipeout-docs.rl>
  <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=routed-events'" text="'routed event'"></wipeout-docs.rl>. This means that if a viewModel which is a decendent of the list fires a removeItem routed event with a specic model as the event args, then
     the model will be removed from the <wipeout-docs.rl href="'/wipeout/v2-alpha/api.html?type=api&amp;className=wo.list&amp;propertyName=items&amp;isStatic=false'" text="'items'"></wipeout-docs.rl>  of the list.
 </p>
@@ -4351,7 +4351,7 @@ private functionality of the library.</p>
 <h2><wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=templates-content'" text="'wo.content'" /></h2>
 <p>This class derives from wo.view and provides functionality to specify the template as a template string rather than as an Id.</p>
 
-<h2><wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=working-with-lists'" text="'wo.list'" /></h2>
+<h2><wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'wo.list'" /></h2>
 <p>This class derives from wo.content and provides list building functionality. This is the wipeout equivelant of the "foreach" knockout binding</p>
 
 <h2><wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=if-control'" text="'wo.if'" /></h2>
@@ -4595,6 +4595,31 @@ without breaking anything you wouldn't expect to break in javascript.</p>
 </wipeout-docs.view-models.components.usage-code-block> 
 </script>
 
+<script id="Articles.wo-foreach" type="text/template">
+<wipeout-docs.view-models.components.versioned version="2.1">
+    <content-template>
+        <h1>The Foreach attribute</h1>
+        <h3><code>wo-foreach="value"</code></h3>
+        <h3><code>data-wo-foreach="value"</code></h3>
+        <p>The foreach attribute renders the content of an element only if the content of the attribue evaluates to true.</p>
+        <p>The <code>foreach</code> attribute wraps an <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'list view model'"></wipeout-docs.rl>, which can be used if you also need to define a more complex template.</p>
+        <wipeout-docs.view-models.components.new-template-code-block new-script-id="'wo-foreach-attr'" highlight--s="wo-if">
+            <code parser="s">&lt;wo.content model="['Item 1', 'Item 2']">
+    &lt;set-template>
+        &lt;ul wo-foreach="$model">
+            &lt;li wo-content="$model + ', index: ' + $index.value">&lt;/li> 
+        &lt;/ul>
+    &lt;/set-template>
+&lt;/wo.content></code>
+        </wipeout-docs.view-models.components.new-template-code-block>
+
+        <wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
+            <code parser="s">&lt;wo.view template-id="'wo-foreach-attr'">&lt;/wo.view></code>
+        </wipeout-docs.view-models.components.usage-code-block> 
+    </content-template>
+</wipeout-docs.view-models.components.versioned>
+</script>
+
 <script id="Articles.wo-if" type="text/template">
 <wipeout-docs.view-models.components.versioned version="2.1">
     <content-template>
@@ -4671,6 +4696,30 @@ without breaking anything you wouldn't expect to break in javascript.</p>
 <wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
     <code parser="s">&lt;wo.view template-id="'wo-keyup-attr'">&lt;/wo.view></code>
 </wipeout-docs.view-models.components.usage-code-block> 
+</script>
+
+<script id="Articles.wo-list-control" type="text/template">
+<h1>wo.list Control</h1>
+
+<p>Within wipeout, lists are handled by the <wipeout-docs.rl href="'/wipeout/v2-alpha/api.html?type=api&amp;className=wo.list'" text="'list'"></wipeout-docs.rl> viewModel. The list allows you to specify a template for each item in the list and render accordingly.
+</p>
+    
+<wipeout-docs.view-models.components.new-template-code-block new-script-id--s="wo-list-control-1">
+    <code parser="s">&lt;wo.list items="['Hello wipeout 1', 'Hello wipeout 2']">
+    &lt;item-template>
+        &lt;div>
+            &lt;span wo-content="$model">&lt;/span>, 
+            Index: &lt;span wo-content="$index.value">&lt;/span>
+        &lt;/div>
+    &lt;/item-template>
+&lt;/wo.list></code>
+</wipeout-docs.view-models.components.new-template-code-block>
+<wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
+    <code parser="s">&lt;wo.view template-id--s="wo-list-control-1">&lt;/wo.view></code>
+</wipeout-docs.view-models.components.usage-code-block>
+
+<p>In the itemTemplate, you access an object from the <code>items</code> using the <code>$model</code> property. You can also access the object's index using <code>$index.value</code>.
+</p>
 </script>
 
 <script id="Articles.wo-mousedown" type="text/template">
@@ -4917,25 +4966,21 @@ without breaking anything you wouldn't expect to break in javascript.</p>
 <script id="Articles.working-with-lists" type="text/template">
 <h1>Working with lists</h1>
 
-<p>Within wipeout, lists are handled by the <wipeout-docs.rl href="'/wipeout/v2-alpha/api.html?type=api&amp;className=wo.list'" text="'list'"></wipeout-docs.rl> viewModel. The items control allows you to specify a template for each item in the list and render accordingly.
-</p>
-    
-<wipeout-docs.view-models.components.new-template-code-block new-script-id--s="working-with-lists-1">
-    <code parser="s">&lt;wo.list items="['Hello wipeout 1', 'Hello wipeout 2']">
-    &lt;item-template>
-        &lt;div>
-            &lt;span wo-content="$model">&lt;/span>, 
-            Index: &lt;span wo-content="$index.value">&lt;/span>
-        &lt;/div>
-    &lt;/item-template>
-&lt;/wo.list></code>
-</wipeout-docs.view-models.components.new-template-code-block>
-<wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
-    <code parser="s">&lt;wo.view template-id--s="working-with-lists-1">&lt;/wo.view></code>
-</wipeout-docs.view-models.components.usage-code-block>
+<p>The simplest way to handle lists is with the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-foreach'" text="'foreach'"></wipeout-docs.rl> attribute. Foreach creates a new view model for each item in the attribute and adds the item as the model of the created view model.</p>
+<wipeout-docs.view-models.components.new-template-code-block new-script-id="'working-with-lists-example-1'" highlight--s="wo-foreach">
+            <code parser="s">&lt;wo.content model="['Item 1', 'Item 2']">
+    &lt;set-template>
+        &lt;ul wo-foreach="$model">
+            &lt;li wo-content="$model + ', index: ' + $index.value">&lt;/li> 
+        &lt;/ul>
+    &lt;/set-template>
+&lt;/wo.content></code>
+        </wipeout-docs.view-models.components.new-template-code-block>
 
-<p>In the itemTemplate, you access an object from the <code>items</code> using the <code>$model</code> property. You can also access the object's index using <code>$index.value</code>.
-</p>
+        <wipeout-docs.view-models.components.usage-code-block show-definition-code="false">
+            <code parser="s">&lt;wo.view template-id="'working-with-lists-example-1'">&lt;/wo.view></code>
+        </wipeout-docs.view-models.components.usage-code-block> 
+<p>The <code>foreach</code> attribure wraps the <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=wo-list-control'" text="'wo.list'"></wipeout-docs.rl> view model which can handle more complex situations.</p>
 </script>
 
 <script id="wipeoutDocs.viewModels.apiApplication" type="text/template">

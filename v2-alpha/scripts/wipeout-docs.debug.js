@@ -1670,6 +1670,7 @@ compiler.registerClass("wipeoutDocs.models.howDoIApplication", "orienteer", func
         ]}, {        
             header: new articleLink("Work with lists", "working-with-lists"),
             items: [
+                new articleLink("wo.list control", "wo-list-control"),
                 new articleLink("Setting the list template", "list-template"),
                 new articleLink("List item lifecycle", "list-item-lifecycle"),
                 new articleLink("Creating custom list items", "list-custom-items"),
@@ -1691,7 +1692,8 @@ compiler.registerClass("wipeoutDocs.models.howDoIApplication", "orienteer", func
                 new articleLink("Content", "wo-content"),
                 new articleLink("Event", "wo-event"),
                 new articleLink("Focus", "wo-focus"),
-             //   new articleLink("If", "wo-if"),
+                new articleLink("For each", "wo-foreach"),
+                new articleLink("If", "wo-if"),
                 new articleLink("Keydown", "wo-keydown"),
                 new articleLink("Keypress", "wo-keypress"),
                 new articleLink("Keyup", "wo-keyup"),
@@ -2150,10 +2152,12 @@ compiler.registerClass("wipeoutDocs.viewModels.components.usageCodeBlock", "wipe
 });
 
 wo.viewModel("wipeoutDocs.viewModels.components.versioned")
-/*.templateId(wo.content.createAnonymousTemplate('<fieldset>\
-    <legend>version {{$this.version}}</legend>\
-    <wo.view template-id="$this.contentTemplateId" share-parent-scope="true"></wo.view>\
-</fieldset>'))*/
+.templateId(wo.content.createAnonymousTemplate('<div class="well">\
+    <fieldset>\
+        <legend>Version > {{$this.version}}</legend>\
+        <wo.view template-id="$this.contentTemplateId" share-parent-scope="true"></wo.view>\
+    </fieldset>\
+</div>'))
 .initialize(function () {
     wipeout.viewModels.content.createTemplatePropertyFor(this, "contentTemplateId", "contentTemplate");
 })
