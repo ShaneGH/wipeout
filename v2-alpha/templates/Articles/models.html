@@ -1,10 +1,10 @@
 <h1>Models</h1>
 
-<p>View models have a special property to deal with business logic and business data. This is the model property. The model is the driver of the application. It provides and recieves almost all data from both the server and the user. It is also the initial argumnent to <wipeout-docs.rl href="'/wipeout/v2.0/how-do-i.html?article=manually-create-an-application'" text="'wo(...)'"></wipeout-docs.rl> which creates an application in the first place.</p>
+<p>View models have a special property to deal with business logic and business data. This is the model property. The model is the driver of the application. It provides and recieves almost all data from both the server and the user. It is also the initial argumnent to <wipeout-docs.rl href="'/wipeout/## insert: site-directory ##/how-do-i.html?article=manually-create-an-application'" text="'wo(...)'"></wipeout-docs.rl> which creates an application in the first place.</p>
 <p> The model property is special in that:</p>
 <ol>
     <li>It has it's own alias within a template binding. Rather than use <code>$this.model</code>, you can simply use <code>$model</code> instead.</li>
-    <li>Models cascade. If you do not explicitly set the model of a view model within the template or <code><wipeout-docs.rl href="'/wipeout/v2.0/how-do-i.html?article=view-model-lifecycle'" text="'initialize(...)'"></wipeout-docs.rl></code> function of the <code>wo.viewModel(...)</code> tool then it will receive the model of it's parent.</li>
+    <li>Models cascade. If you do not explicitly set the model of a view model within the template or <code><wipeout-docs.rl href="'/wipeout/## insert: site-directory ##/how-do-i.html?article=view-model-lifecycle'" text="'initialize(...)'"></wipeout-docs.rl></code> function of the <code>wo.viewModel(...)</code> tool then it will receive the model of it's parent.</li>
 </ol>
 <wipeout-docs.view-models.components.new-template-code-block new-script-id--s="models-example" highlight--s="notice how the">
     <code parser="s">&lt;wo.content model--string="Hello wipeout!">

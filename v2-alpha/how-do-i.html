@@ -1026,7 +1026,7 @@ If the model property of a viewModel is not explicitly set, it recieves the mode
 
 <script id="Articles.content" type="text/template">
 <h1>Setting the template within a template</h1>
-<p>Within wipeout it is often useful to set the template within another template, rather than by id. To do this you can use the <code>content</code> (TOTOD link) view model.</p>
+<p>Within wipeout it is often useful to set the template within another template, rather than by id. To do this you can use the <wipeout-docs.rl href="'/wipeout/v2-alpha/api.html?type=api&amp;className=wo.content'" text--s="wo.content"></wipeout-docs.rl> view model.</p>
 Nested content controls:
 <wipeout-docs.view-models.components.new-template-code-block new-script-id--s="content-article-1" highlight--s="set-template">
     <code parser="s">&lt;wo.content>
@@ -3189,11 +3189,11 @@ wo(model, document.body);</code>
 <script id="Articles.models" type="text/template">
 <h1>Models</h1>
 
-<p>View models have a special property to deal with business logic and business data. This is the model property. The model is the driver of the application. It provides and recieves almost all data from both the server and the user. It is also the initial argumnent to <wipeout-docs.rl href="'/wipeout/v2.0/how-do-i.html?article=manually-create-an-application'" text="'wo(...)'"></wipeout-docs.rl> which creates an application in the first place.</p>
+<p>View models have a special property to deal with business logic and business data. This is the model property. The model is the driver of the application. It provides and recieves almost all data from both the server and the user. It is also the initial argumnent to <wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=manually-create-an-application'" text="'wo(...)'"></wipeout-docs.rl> which creates an application in the first place.</p>
 <p> The model property is special in that:</p>
 <ol>
     <li>It has it's own alias within a template binding. Rather than use <code>$this.model</code>, you can simply use <code>$model</code> instead.</li>
-    <li>Models cascade. If you do not explicitly set the model of a view model within the template or <code><wipeout-docs.rl href="'/wipeout/v2.0/how-do-i.html?article=view-model-lifecycle'" text="'initialize(...)'"></wipeout-docs.rl></code> function of the <code>wo.viewModel(...)</code> tool then it will receive the model of it's parent.</li>
+    <li>Models cascade. If you do not explicitly set the model of a view model within the template or <code><wipeout-docs.rl href="'/wipeout/v2-alpha/how-do-i.html?article=view-model-lifecycle'" text="'initialize(...)'"></wipeout-docs.rl></code> function of the <code>wo.viewModel(...)</code> tool then it will receive the model of it's parent.</li>
 </ol>
 <wipeout-docs.view-models.components.new-template-code-block new-script-id--s="models-example" highlight--s="notice how the">
     <code parser="s">&lt;wo.content model--string="Hello wipeout!">
