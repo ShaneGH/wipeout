@@ -212,7 +212,7 @@ function viewModel (name, extend, doNotWarn) {
 			if (parsers[propertyName])
 				throw "A parser has already been set for this object";
 
-			inheritanceTree = inheritanceTree || orienteer.getInheritanceChain.apply(extend);
+			inheritanceTree = inheritanceTree || orienteer.getInheritanceChain(extend);
 			if (inheritanceTree.indexOf(wipeout.base.bindable) === -1)
 				throw "You must inherit from wipeout.base.bindable to use global parsers. Alternatively you can inherit from any view model, such as wo.view, wo.content, wo.list etc...";
 
