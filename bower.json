@@ -6,7 +6,7 @@
     "Shane Connon <shane.connon@gmail.com>"
   ],
   "description": "A javascript MVVM framework",
-  "main": ["release/wipeout-2.0.0.debug.js", "release/wipeout-2.0.0.js"],
+  "main": ["release/wipeout-2.1.0.debug.js", "release/wipeout-2.1.0.js"],
   "license": "MIT",
   "private": true,
   "ignore": [
