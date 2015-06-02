@@ -31,12 +31,15 @@ testUtils.testWithUtils("build url", null, false, function(methods, classes, sub
     
     // arrange
     // act
-    wipeout.services.url(subject, "blabla/{item1}/lalala/{item2}{itemX}");
+    window.globalItem = {item:"asdasd"};
+    wipeout.services.url(subject, "blabla/{item1}/[globalItem.item]/{item2}{itemX}");
     subject.item1 = "something";
     subject.item2 = "another thing";
 
     //assert
-    strictEqual(subject.$urlBuilder(subject), "blabla/something/lalala/another%20thingnull");
+    strictEqual(subject.$urlBuilder(subject), "blabla/something/asdasd/another%20thingnull");
+    
+    delete window.globalItem;
 });
 
 testUtils.testWithUtils("build url and hydrate", null, false, function(methods, classes, subject, invoker) {
