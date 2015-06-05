@@ -83,7 +83,7 @@ Class("wipeout.utils.find", function () {
         
         var getItem = getModel ? 
             function(item) {
-                return item && item.$this instanceof wo.view ? item.$this.model : null;
+                return item && item.$this instanceof wipeout.viewModels.view ? item.$this.model : null;
             } : 
             function(item) { 
                 return item ? item.$this : null;

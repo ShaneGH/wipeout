@@ -13,7 +13,7 @@ function viewModel (name, extend, doNotWarn) {
 		
 	extend = extend || wipeout.viewModels.view;
 	
-	var isViewModel = orienteer.getInheritanceChain(extend).indexOf(wo.view) !== -1;
+	var isViewModel = orienteer.getInheritanceChain(extend).indexOf(wipeout.viewModels.view) !== -1;
 	var isDisposable = orienteer.getInheritanceChain(extend).indexOf(busybody.disposable) !== -1;
 	
 	var $constructor,

@@ -137,6 +137,9 @@ Class("wipeout.template.rendering.renderedContent", function () {
         ///<summary>Remove a view model's template, leaving it blank</summary>
         ///<param name="leaveDeadChildNodes" type="Boolean">If set to true, do not remove html nodes after disposal. This is a performance optimization</param>
         
+        if (this.viewModel instanceof wipeout.viewModels.view)
+            this.viewModel.onUnrendered();
+        
 		delete this.currentTemplate;
 		
         // dispose of bindings
