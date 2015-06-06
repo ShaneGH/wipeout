@@ -15,19 +15,30 @@ Class("wipeout.utils.viewModels", function () {
 		return /^js[A-Z]/.test(name) ? name.substr(2) : name;
 	};
 	
-	viewModels.getViewModel = function (htmlNode, endAt) {
+	viewModels.getViewModel = function (htmlNode, includeNoScopeItems, endAt) {
         ///<summary>Get the view model which rendered this node (if any)</summary>
         ///<param name="htmlNode" type="Element">The node</param>
+        ///<param name="includeNoScopeItems" type="Boolean" optional="true">Default: false. If false, will ignore view models with shareParentScope == true</param>
         ///<param name="endAt" type="Element" optional="true">An element which definitely has not view model, meaning all parent elements will also not have a view model.</param>
         ///<returns type="Object">The view model</returns>
 		
 		if (!htmlNode || htmlNode === endAt)
 			return;
 		
+        var vm;
 		if (htmlNode.wipeoutOpening)
-			return htmlNode.wipeoutOpening.viewModel;
-		if (htmlNode.wipeoutClosing)
-			return htmlNode.wipeoutClosing.viewModel;
+			vm = htmlNode.wipeoutOpening.viewModel;
+		else if (htmlNode.wipeoutClosing)
+			vm = htmlNode.wipeoutClosing.viewModel;
+        
+        if (vm) {
+            if (includeNoScopeItems || !vm.shareParentScope)
+                return vm;
+            
+            // shortcut if available
+            if (vm.$domRoot && vm.$domRoot.renderContext)
+                vm.$domRoot.renderContext.$this;
+        }
 		
 		var ps = htmlNode.previousSibling;
 		if (ps && ps.wipeoutClosing)

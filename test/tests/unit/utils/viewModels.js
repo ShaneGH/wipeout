@@ -66,6 +66,27 @@ test("getViewModel, parent and previous sibling have vms", function() {
 	strictEqual(wipeout.utils.viewModels.getViewModel(document.getElementById("theItem")).xxx, 555);
 });
 
+test("getViewModel, shareParentScope", function() {
+	
+	// arrange
+	$("#qunit-fixture").html('<wo.content xxx="555">\
+	<set-template>\
+		<wo.content share-parent-scope="true" xxx="666">\
+	       <set-template>\
+		      <div id="theItem"></div>\
+	       </set-template>\
+        </wo.content>\
+	</set-template>\
+</wo.content>');
+	
+	wo($("#qunit-fixture")[0]);
+	
+	// act
+	// assert
+	strictEqual(wipeout.utils.viewModels.getViewModel(document.getElementById("theItem")).xxx, 555);
+	strictEqual(wipeout.utils.viewModels.getViewModel(document.getElementById("theItem"), true).xxx, 555);
+});
+
 test("definitely not a view model", function() {
     
     try {
