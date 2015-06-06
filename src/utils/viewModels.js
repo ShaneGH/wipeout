@@ -33,7 +33,7 @@ Class("wipeout.utils.viewModels", function () {
 		if (ps && ps.wipeoutClosing)
 			ps = ps.wipeoutClosing.openingTag.previousSibling || htmlNode.parentNode;
 				
-		return viewModels.getViewModel(ps);
+		return viewModels.getViewModel(ps, endAt);
 	};
 	
 	viewModels.getViewModelConstructor = function (wmlElement) {
