@@ -17,7 +17,6 @@
         .templateProperty("formTemplate")
         .rendered(function () {
             var t = t1;
-            debugger;
         })
         .build();
     
