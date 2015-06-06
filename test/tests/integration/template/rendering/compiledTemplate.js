@@ -74,5 +74,5 @@ hello\
 	assert(8, 1, {localName: "div", innerHTML: "anotherHello"});
 	ok(!html.childNodes[8].id);
 	
-	strictEqual(wipeout.utils.html.getViewModel(html.childNodes[5]).hello, "bellbo");
+	strictEqual(wipeout.utils.viewModels.getViewModel(html.childNodes[5]).hello, "bellbo");
 });

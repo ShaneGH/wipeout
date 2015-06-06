@@ -15,7 +15,7 @@ window.integrationTestSetup = function () {
 	window.$fixture = $("#qunit-fixture");
 	$fixture.html("<div data-wo-el='testApp' model='busybody.makeObservable()' application='true'></div>");
 	wo(null, $fixture.children()[0]);
-	window.application = wipeout.utils.html.getViewModel(window.node = $fixture[0].firstChild);
+	window.application = wipeout.utils.viewModels.getViewModel(window.node = $fixture[0].firstChild);
 	application.application = true;
 
 	window.views = {};

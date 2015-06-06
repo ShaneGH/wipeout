@@ -1,22 +1,5 @@
 
-Class("wipeout.utils.html", function () { 
-    
-    var getViewModel = function(forHtmlNode) {
-        ///<summary>Get the view model associated with a html node</summary>
-        ///<param name="forHtmlNode" type="HTMLNode">The element which is the root node of a wo.view</param>
-        ///<returns type="wo.view">The view model associated with this node, or null</returns>
-        
-		if (!forHtmlNode)
-			return null;
-				
-        if (forHtmlNode.wipeoutOpening)
-			return forHtmlNode.wipeoutOpening.viewModel;
-		
-		if (forHtmlNode.wipeoutClosing)
-			return forHtmlNode.wipeoutClosing.viewModel;
-		
-		return getViewModel(wipeout.template.rendering.renderedContent.getParentElement(forHtmlNode));
-    };
+Class("wipeout.utils.html", function () {
     
     var createTemplatePlaceholder = function(forViewModel) {
         ///<summary>Create a html node so serve as a temporary template while the template loads asynchronously</summary>
@@ -32,7 +15,6 @@ Class("wipeout.utils.html", function () {
     };
     
     html.createTemplatePlaceholder = createTemplatePlaceholder;
-    html.getViewModel = getViewModel
     
     return html;    
 });
