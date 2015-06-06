@@ -202,6 +202,8 @@ testUtils.testWithUtils("dispose", null, false, function(methods, classes, subje
     subject.dispose();
 });
 
+/*initialize, rendered, unRendered, dispose, initializeApplication*/
+
 test("global binding/parser", function() {
 	// arrange	
 	// act
@@ -212,4 +214,32 @@ test("global binding/parser", function() {
 	// assert
 	strictEqual(vm.getGlobalBindingType("bla"), "tw");
 	strictEqual(vm.getGlobalParser("bla"), wipeout.template.initialization.parsers.s);
+});
+
+test("all convenience methods", function() {
+	// arrange	
+    var init, rend, unrend, disp, initApp;
+	wo.viewModel("vms.test")
+		.initialize(function () { init = true; })
+		.rendered(function () { rend = true; })
+		.unRendered(function () { unrend = true; })
+		.dispose(function () { disp = true; assert(); })
+		.initializeApplication(function () { initApp = true; })
+        .build();
+        
+	// act
+    $("#qunit-fixture").html("<vms.test id='vmstest'></vms.test><js-object id='jsobj'></js-object>");
+    wo(null, "vmstest").dispose();
+
+	// assert
+    function assert() {
+        ok(init);
+        ok(rend);
+        ok(rend);
+        ok(disp);
+        ok(initApp);
+    }
+    
+    // smoke test for non vms, ensure no exceptions
+    wo(null, "jsobj").dispose();
 });
