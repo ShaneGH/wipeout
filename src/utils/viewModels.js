@@ -37,7 +37,7 @@ Class("wipeout.utils.viewModels", function () {
             
             // shortcut if available
             if (vm.$domRoot && vm.$domRoot.renderContext)
-                vm.$domRoot.renderContext.$this;
+                return vm.$domRoot.renderContext.$this;
         }
 		
 		var ps = htmlNode.previousSibling;
