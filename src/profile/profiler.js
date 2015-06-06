@@ -24,7 +24,7 @@ Class("wipeout.profile.profile", function () {
                     e.stopPropagation();
                     e.preventDefault();
 
-                    var vm = wo.html.getViewModel(e.target);
+                    var vm = wipeout.utils.viewModels.getViewModel(e.target);
 					if(!vm) return;
                     var vms = vm.getParents();
                     vms.splice(0, 0, vm);

@@ -113,7 +113,7 @@ Class("wipeout.profile.highlighter", function () {
         var newElement = document.elementFromPoint(e.clientX, e.clientY);
         if(newElement === this.currentElement) return;
         this.currentElement = newElement;
-        var vm = wipeout.utils.html.getViewModel(this.currentElement);
+        var vm = wipeout.utils.viewModels.getViewModel(this.currentElement);
         if(!vm || vm === this.currentHighlighter.vm) return;
 
         var timeout = this.__timeoutToken = {};
