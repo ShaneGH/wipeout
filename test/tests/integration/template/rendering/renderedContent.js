@@ -341,9 +341,8 @@ test("template and untemplate, with click attribute", function() {
 		}
 	});
 	
-	rc.viewModel = {
-		onRendered: methods.method()
-	};
+	rc.viewModel = new wipeout.viewModels.view();
+    rc.viewModel.onRendered = methods.method();
 	
 	var tid = wipeout.viewModels.content.createAnonymousTemplate('<button id="theButton" wo-click="$this.doSomething()"></button>');
 	
