@@ -33,4 +33,11 @@ expose("triggerEvent", function triggerEvent (forObject, event, eventArgs) {
 enumerateObj(wipeout.viewModels, function(vm, name) {
 	expose(name, vm);
 });
+
+enumerateArr(setup, function(f) {
+    f();
+});
+
+setup = null;
+
 }(window.orienteer, window.busybody));

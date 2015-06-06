@@ -24,7 +24,7 @@ Class("wipeout.services.url", function () {
                 if (!result1 || (result2 && result1.index > result2.index)) {
                     open = open2;
                     close = close2;
-                    result1 = "window.";
+                    result1 = "";
                 } else {
                     open = open1;
                     close = close1;

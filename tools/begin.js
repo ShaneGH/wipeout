@@ -2,6 +2,8 @@
 (function (orienteer, busybody) {
     
     window.wipeout = {};
+    
+    var setup = [];
 	
 	function warn (warning, data) {
 		if (wipeout.settings.displayWarnings) {

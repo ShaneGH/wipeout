@@ -91,6 +91,8 @@ Class("wipeout.template.rendering.renderedContent", function () {
 			
             if (this.viewModel.templateId)
                 this.template(this.viewModel.templateId);
+            else if (this.viewModel instanceof wipeout.viewModels.view)
+                this.viewModel.onRendered();
         } else {
             this.appendHtml(this.viewModel.toString());
         }
@@ -185,7 +187,8 @@ Class("wipeout.template.rendering.renderedContent", function () {
             this.disposeOfBindings = template.quickBuild(this.appendHtml.bind(this), this.renderContext);
             this.__initialTemplate = true;
             
-            this.viewModel.onRendered();
+            if (this.viewModel instanceof wipeout.viewModels.view)
+                this.viewModel.onRendered();
         }).bind(this));
         
         if (this.asynchronous) {            

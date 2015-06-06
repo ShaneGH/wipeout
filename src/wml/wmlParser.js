@@ -1,7 +1,7 @@
 
 //http://www.w3.org/TR/html-markup/syntax.html
 Class("wipeout.wml.wmlParser", function () {  
-        
+    
     // tags which cannot go into a <div /> tag, along with the tag they should go into
     wmlParser.specialTags = {
         area: "map",
