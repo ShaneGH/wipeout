@@ -117,9 +117,17 @@
 	
 	<script src="tests/unit/wo.js"></script>
     
-    <wo.rest-form>
+    <div>CCC</div>
+    <wo.rest-form f="'f1'">
         <form-template>
-            Hi
+            Hi1
+            <input type="submit" value="f1" />
+            <wo.rest-form f="'f2'">
+                <form-template>
+                    Hi2
+                    <input type="submit" value="f2" />
+                </form-template>
+            </wo.rest-form>
         </form-template>
     </wo.rest-form>
     

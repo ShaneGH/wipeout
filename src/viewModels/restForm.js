@@ -1,13 +1,14 @@
 (function () {
     
-    var t1, t2;    
+    var formTemplate, divTemplate;    
     // execute after wipeout is initialized
     setup.push(function () {
-        t1 = wipeout.viewModels.content.createAnonymousTemplate('<form wo-submit="$this.submit(element)" wo-attr-class="$this.class" wo-attr-style="$this.style">\
-            <wo.view id="$this.formTemplateId" share-parent-scope="true"></wo.view>\
+        //TODM: style and class attributes
+        formTemplate = wipeout.viewModels.content.createAnonymousTemplate('<form wo-submit="$this.submit(element)" wo-attr-class="$this.class" wo-attr-style="$this.style">\
+            <wo.view template-id="$this.formTemplateId" share-parent-scope="true"></wo.view>\
         </form>');
-        t2 = wipeout.viewModels.content.createAnonymousTemplate('<div wo-attr-class="$this.class" wo-attr-style="$this.style">\
-            <wo.view id="$this.formTemplateId" share-parent-scope="true"></wo.view>\
+        divTemplate = wipeout.viewModels.content.createAnonymousTemplate('<div wo-attr-class="$this.class" wo-attr-style="$this.style">\
+            <wo.view template-id="$this.formTemplateId" share-parent-scope="true"></wo.view>\
         </div>');
     });
     
@@ -16,19 +17,37 @@
         .value("style", "")
         .templateProperty("formTemplate")
         .rendered(function () {
-            var t = t1;
+            if (this.$hasBeenRendered)
+                return;
+            
+            this.$hasBeenRendered = true;
+            var current = this.$domRoot.openingTag;
+            while (current) {
+                if (current.nodeType === 1 && current.localName === "form") {
+                    this.synchronusTemplateChange(divTemplate);
+                    return;
+                }
+                    
+                current = current.parentElement;
+            }
+            
+            this.synchronusTemplateChange(formTemplate);
         })
         .build();
     
     restForm.submit = function (element) {
-        
+        debugger;
         // form might be a child vm
-        var form = wipeout.utils.html.getViewModel(element);
+        var form = wipeout.utils.html.getViewModel(document.activeElement);
         if (form instanceof wipeout.viewModels.restForm)
             form.submitForm();
+        else
+            this.submitForm();
     };
     
     restForm.submitForm = function () {
+        alert(this.f);
+        
         if (!this.model)
             return;
         
