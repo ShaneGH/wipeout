@@ -13,7 +13,7 @@ Class("wipeout.services.url", function () {
                 close1 = /\}/g,
                 open2 = /\[/g,
                 close2 = /\]/g,
-                open, close, result1, result2;
+                open, close, result1, result2, lastIndex = 0;
             
             while (true) {
                 result1 = open1.exec(url);
@@ -38,10 +38,13 @@ Class("wipeout.services.url", function () {
                 else
                     throw "Invalid URL: " + url;
                 
-                open1.lastIndex = close1.lastIndex = open2.lastIndex = close2.lastIndex = close.lastIndex;
+                lastIndex = open1.lastIndex = close1.lastIndex = open2.lastIndex = close2.lastIndex = close.lastIndex;
             }
             
+            urlFunc.push('"' + url.substring(lastIndex) + '"');
+            
             urlCache[url] = new Function("model", "\treturn " + urlFunc.join(" +\n\t\t\t") + ";");
+            urlCache[url].url = url;
         }
 
         Object.defineProperty(object, "$urlBuilder", {
@@ -97,21 +100,87 @@ Class("wipeout.services.url", function () {
         
         return object;
     }
+        
+    //TODO: all of the return falses should have detailed warnings
+    var relativeUrlTest = /^~/;
+    url.buildUrlFor = function (object, path) {
+        
+        object = [object];
+        if (path) {
+            path = wipeout.utils.obj.splitPropertyName(path);
+            for (var i = 0, ii = path.length; i < ii; i++) {
+                if (object[i] == null)
+                    return false;
+                
+                object.push(object[i][path[i]]);
+            }
+            
+            object.reverse();
+            path.reverse();
+        } else {
+            path = [];
+        }
+        
+        if (object[0] == null)
+            return false;
+        
+        var url = [];
+        for (var i = 0, ii = object.length; i < ii; i++) {
+            if (typeof object[i].$urlBuilder !== "function") {
+                if (i > path.length - 1)
+                    return false;
+            
+                url.splice(0, 0, "/" + path[i].toString());
+            } else {
+                url.splice(0, 0, object[i].$urlBuilder(object[i]));
+                if (!relativeUrlTest.test(url[0]))
+                    break;
+            }
+        }
+        
+        if (relativeUrlTest.test(url[0]))
+            return false;
+        
+        enumerateArr(url, function (val, i) {
+            url[i] = val.replace(relativeUrlTest, "");
+        });
+        
+        return {
+            object: object[0],
+            url: url.join("")
+        };
+    };
     
+    url.post = function (object, path) {
+        var obj = url.buildUrlFor(object, path);
+        if (!obj)
+            return false;
+        
+        warn("do post here");
+        
+        return obj;
+    };
+    
+    var isAFunction = {};
     url.stringify = function (object) {
+        if (typeof object === "function")
+            return isAFunction;
+        
         if (typeof object !== "object" || (object && object.constructor === Date))
             return JSON.stringify(object);
         
-        var output = [], open, close;
+        var output = [], open, close, tmp;
         if (object instanceof Array) {
             open = "[", close = "]";
             enumerateArr(object, function (object) {
-                output.push(url.stringify(object));
+                if ((tmp = url.stringify(object)) !== isAFunction)
+                    output.push(tmp);
             });
         } else {
             open = "{", close = "}";
             enumerateObj(object, function (object, i) {
-                output.push(JSON.stringify(i) + ':' + url.stringify(object));
+                if ((tmp = url.stringify(object)) !== isAFunction)
+                    output.push(JSON.stringify(i) + ':' + tmp);
             });
         }
         

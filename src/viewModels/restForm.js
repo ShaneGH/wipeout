@@ -36,9 +36,10 @@
         .build();
     
     restForm.submit = function (element) {
-        debugger;
+        
         // form might be a child vm
-        var form = wipeout.utils.html.getViewModel(document.activeElement);
+        //TODM document.activeElement
+        var form = wipeout.utils.viewModels.getViewModel(document.activeElement);
         if (form instanceof wipeout.viewModels.restForm)
             form.submitForm();
         else
@@ -46,10 +47,12 @@
     };
     
     restForm.submitForm = function () {
-        alert(this.f);
         
         if (!this.model)
             return;
+        
+        if (this.url)
+            wipeout.services.url(this.model, this.url);
         
         //TODO: non standard
         if (!this.model.$urlBuilder && !this.url) {

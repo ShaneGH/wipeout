@@ -31,6 +31,11 @@
 	<script src="tests/integration/htmlBindingTypes/templateElementSetter.js"></script>
 	<script src="tests/integration/htmlBindingTypes/tw.js"></script>
 	<script src="tests/integration/htmlBindingTypes/viewModelId.js"></script>
+    
+	<script src="tests/integration/services/router.js"></script>
+    
+	<script src="tests/integration/services/routing/route.js"></script>
+	<script src="tests/integration/services/routing/routePart.js"></script>
 	
 	<script src="tests/integration/template/loader.js"></script>
 	<script src="tests/integration/template/propertyValue.js"></script>
@@ -89,6 +94,8 @@
 	<script src="tests/unit/polyfills/Function.js"></script>
     
 	<script src="tests/unit/services/url.js"></script>
+    
+	<script src="tests/unit/services/routing/route.js"></script>
 	
 	<script src="tests/unit/template/context.js"></script>
 	<script src="tests/unit/template/propertyValue.js"></script>
@@ -129,6 +136,21 @@
             </wo.rest-form>
         </form-template>
     </wo.rest-form>
+    
+    
+    <wo.route route--s="http://www.mysite.com/articles/{id}">
+        <set-template>
+            {{$model.articleContent}}
+            <wo.route model="$model.references" route--s="~/references">
+                <set-template>
+                    <ul wo-foreach="$model">
+                        <li>{{$model.name}} {{$model.text}}</li>
+                    </ul>
+                </set-template>
+            </wo.route>
+        </set-template>
+    </wo.route>
+    
     
     
     

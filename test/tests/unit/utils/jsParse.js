@@ -48,3 +48,49 @@ testUtils.testWithUtils("removeCommentsTokenStringsAndBrackets", "", true, funct
     strictEqual(output["##token" + (tokenNumber + 1) + "##"], b2);
     strictEqual(output["##token" + (tokenNumber + 2) + "##"], b3);
 });
+
+testUtils.testWithUtils("getArgumentNames", "vanilla", true, function(methods, classes, subject, invoker) {
+	
+    // arrange
+    // act
+    var output = invoker(function (a1, $b2, c3) {});
+    
+    // assert
+    strictEqual(output.length, 3);
+    strictEqual(output[0], "a1");
+    strictEqual(output[1], "$b2");
+    strictEqual(output[2], "c3");
+});
+
+testUtils.testWithUtils("getArgumentNames", "comment", true, function(methods, classes, subject, invoker) {
+	
+    // arrange
+    // act
+    var output = invoker(function (/*laksd*/a1, b2 /*asdasdasd*/, c3 /*ASDasDAASD*/) {});
+    
+    // assert
+    strictEqual(output.length, 3);
+    strictEqual(output[0], "a1");
+    strictEqual(output[1], "b2");
+    strictEqual(output[2], "c3");
+});
+
+testUtils.testWithUtils("getArgumentNames", "no args", true, function(methods, classes, subject, invoker) {
+	
+    // arrange
+    // act
+    var output = invoker(function ( ) {});
+    
+    // assert
+    strictEqual(output.length, 0);
+});
+
+testUtils.testWithUtils("getArgumentNames", "no args, comment", true, function(methods, classes, subject, invoker) {
+	
+    // arrange
+    // act
+    var output = invoker(function ( /* hello */ ) {});
+    
+    // assert
+    strictEqual(output.length, 0);
+});

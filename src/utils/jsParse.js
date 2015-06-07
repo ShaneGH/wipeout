@@ -157,7 +157,25 @@ Class("wipeout.utils.jsParse", function () {
 		return toString;
 	};
     
+    function getArgumentNames (callback) {
+        if (!(callback instanceof Function))
+            return [];
+        
+        // /\/\*[\s\S]*?\*\//mg;
+        // /\/\*.*\*\//g
+        var args = /\([\w\,\s\$]*(?=\))/.exec(callback.toString().replace(/\/\*[\s\S]*?\*\//mg, ""));
+        if (!args)
+            return [];
+        
+        args = args[0].substr(1).replace(/\s/g, "");
+        if (!args.length)
+            return [];
+        
+        return args.split(",");
+    }
+    
     function jsParse() { };
+    jsParse.getArgumentNames = getArgumentNames;
     jsParse.removeCommentsTokenStrings = removeCommentsTokenStrings;
     jsParse.removeCommentsTokenStringsAndBrackets = removeCommentsTokenStringsAndBrackets;
     return jsParse;

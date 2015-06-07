@@ -27,6 +27,17 @@ testUtils.testWithUtils("invalid url", null, false, function(methods, classes, s
     });
 });
 
+testUtils.testWithUtils("build url", "simple", false, function(methods, classes, subject, invoker) {
+    
+    // arrange
+    // act
+    window.globalItem = {item:"asdasd"};
+    wipeout.services.url(subject, "blabla");
+
+    //assert
+    strictEqual(subject.$urlBuilder(subject), "blabla");
+});
+
 testUtils.testWithUtils("build url", null, false, function(methods, classes, subject, invoker) {
     
     // arrange
@@ -128,3 +139,36 @@ testUtils.testWithUtils("hydrate", null, true, function(methods, classes, subjec
     strictEqual(subject.c[2][2], 5);
     strictEqual(subject.d.e, 7);
 });
+
+testUtils.testWithUtils("buildUrlFor", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    var obj = {
+        prop1: {
+            id: 234,
+            prop2: [{
+                prop3: {
+                    prop4: {}
+                }
+            }]
+        }
+    };
+    
+    wipeout.services.url(obj.prop1, "xxx{id}");
+    wipeout.services.url(obj.prop1.prop2[0].prop3, "~/hello");
+    
+    // act
+    var op = invoker(obj, "prop1.prop2[0].prop3.prop4");
+    
+    // assert
+    strictEqual(op.url, "xxx234/prop2/0/hello/prop4");
+    strictEqual(op.object, obj.prop1.prop2[0].prop3.prop4);
+});
+
+
+
+
+
+
+
+
+
