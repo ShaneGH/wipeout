@@ -150,6 +150,9 @@ Class("wipeout.template.initialization.compiledInitializer", function () {
 			for (var name in this.setters)
 				if (name !== "bindingStrategy" && name !== "model")
 					disposal.push.apply(disposal, this.applyToViewModel(name, viewModel, renderContext));
+            
+            if (viewModel instanceof wo.view)
+                viewModel.onInitialized();
 		}
 		
 		return function () {

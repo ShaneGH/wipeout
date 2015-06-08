@@ -274,3 +274,35 @@ test("all convenience methods", function() {
     // smoke test for non vms, ensure no exceptions
     wo(null, "jsobj").dispose();
 });
+
+test("convenience methods on view model property", function() {
+    
+	// arrange	
+    var init, rend, unrend, disp;
+	wo.viewModel("vms.test")
+		.initialize(function () { init = true; })
+		.rendered(function () { rend = true; })
+		.unRendered(function () { unrend = true; })
+		.dispose(function () { disp = true; assert(); })
+        .build();
+        
+	// act
+    $("#qunit-fixture").html("<wo.content id='vmstest'>\
+    <a-prop>\
+        <vms.test></vms.test>\
+    </a-prop>\
+    <set-template>\
+        {{$this.aProp}}\
+    </set-template>\
+</wo.content>");
+    var disp = wo(null, "vmstest");
+    disp.dispose();
+    
+	// assert
+    function assert() {
+        ok(init);
+        ok(rend);
+        ok(rend);
+        ok(disp);
+    }
+});

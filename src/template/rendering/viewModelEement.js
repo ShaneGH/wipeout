@@ -39,13 +39,9 @@ Class("wipeout.template.rendering.viewModelElement", function () {
 		};
 		
         // run onInitialized after value initialization is complete
-        if (this.createdViewModel instanceof wipeout.viewModels.view) {
-            this.createdViewModel.onInitialized();
-			
-			if (!this.renderContext.$parentContext) {
-				this.createdViewModel.onApplicationInitialized();
-			}
-		}
+        if (this.createdViewModel instanceof wipeout.viewModels.view && !this.renderContext.$parentContext) {
+            this.createdViewModel.onApplicationInitialized();
+        }
         
         this.render(this.createdViewModel);
 		this.render = blockRendering;
