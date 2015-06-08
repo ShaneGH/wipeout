@@ -1,6 +1,4 @@
-// incomplete, removed for now
-
-/*module("wipeout.di.services.$url", {
+module("wipeout.di.services.$url", {
     setup: function() {
     },
     teardown: function() {
@@ -166,7 +164,7 @@ testUtils.testWithUtils("buildUrlFor", null, true, function(methods, classes, su
     strictEqual(op.object, obj.prop1.prop2[0].prop3.prop4);
 });
 
-*/
+
 
 
 
