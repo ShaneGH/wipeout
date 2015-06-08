@@ -3,7 +3,7 @@ Class("wipeout.di.ioc", function () {
     
     setup.push(function () {
                
-        ioc.instance = new ioc(wipeout.services);
+        ioc.instance = new ioc(wipeout.di.services || (wipeout.di.services = {}));
     });
     
     function ioc (services) {

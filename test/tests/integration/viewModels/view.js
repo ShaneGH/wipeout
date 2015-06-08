@@ -445,6 +445,83 @@ testUtils.testWithUtils("registerEvent", "dispose of view", false, function(meth
     ok(true);
 });
 
+test("all convenience methods", function() {
+    
+    clearIntegrationStuff();
+    
+    wipeout.di.services.temp = {};
+	
+    // arrange	
+    var init, rend, unrend, disp, initApp;
+	wo.viewModel("vms.test1")
+		.initialize(function (temp) { init = true; 
+            strictEqual(temp, wipeout.di.services.temp);})
+		.rendered(function () { rend = true; })
+		.unRendered(function () { unrend = true; })
+		.dispose(function () { disp = true; assert(); })
+		.initializeApplication(function () { initApp = true; })
+        .build();
+        
+	// act
+    $("#qunit-fixture").html("<vms.test1 id='vmstest'></vms.test1><js-object id='jsobj'></js-object>");
+    wo(null, "vmstest").dispose();
+
+	// assert
+    function assert() {
+        ok(init);
+        ok(rend);
+        ok(rend);
+        ok(disp);
+        ok(initApp);
+    }
+    
+    // smoke test for non vms, ensure no exceptions
+    wo(null, "jsobj").dispose();
+    
+    delete wipeout.di.services.temp;
+});
+
+test("convenience methods on view model property", function() {
+    
+    clearIntegrationStuff();
+    
+    wipeout.di.services.temp = {};
+    
+	// arrange	
+    var init, rend, unrend, disp;
+	wo.viewModel("vms.test2")
+		.initialize(function (temp) {
+            init = true; 
+            strictEqual(temp, wipeout.di.services.temp);
+        })
+		.rendered(function () { rend = true; })
+		.unRendered(function () { unrend = true; })
+		.dispose(function () { disp = true; assert(); })
+        .build();
+        
+	// act
+    $("#qunit-fixture").html("<wo.content id='vmstest'>\
+    <a-prop>\
+        <vms.test2></vms.test2>\
+    </a-prop>\
+    <set-template>\
+        {{$this.aProp}}\
+    </set-template>\
+</wo.content>");
+    var disp = wo(null, "vmstest");
+    disp.dispose();
+    
+	// assert
+    function assert() {
+        ok(init);
+        ok(rend);
+        ok(rend);
+        ok(disp);
+    }
+    
+    delete wipeout.di.services.temp;
+});
+
 /*test("move view model", function() {
     // arrange
     application.template('<wo.content id="toMove">\
