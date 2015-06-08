@@ -67,7 +67,7 @@ testUtils.testWithUtils("splitRoute", null, true, function(methods, classes, sub
     // arrange
     var vals = {
         protocol: "a+-fr.{asd}dD:",
-        host: "LKJBLKJB&*&T*&T",
+        hostname: "LKJBLKJB&*&T*&T",
         port: "lkashdlk",
         pathname: "/askjbdkjasd/asijdaskj",
         search: "?akjshjahdopiayd09",

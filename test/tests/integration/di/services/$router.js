@@ -9,7 +9,7 @@ testUtils.testWithUtils("route", null, true, function(methods, classes, subject,
     // arrange
     var route = new wipeout.di.services.$router({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -45,7 +45,7 @@ testUtils.testWithUtils("route", "minimal", true, function(methods, classes, sub
     // arrange
     var route = new wipeout.di.services.$router({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         pathname: "/entity/234",
         search: "?entityName=ten",
         hash: "#thsh"
@@ -66,7 +66,7 @@ testUtils.testWithUtils("route", "minimal, dispose", true, function(methods, cla
     // arrange
     var route = new wipeout.di.services.$router({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         pathname: "/entity/234",
         search: "?entityName=ten",
         hash: "#thsh"
@@ -85,7 +85,7 @@ testUtils.testWithUtils("route", "get, then loose control", true, function(metho
     // arrange
     var location = {
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         pathname: "/entity/234",
         search: "?entityName=ten",
         hash: "#thsh"

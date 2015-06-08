@@ -41,7 +41,7 @@ Class("wipeout.di.utils.routing.route", function () {
         
         //TODO: difference between host and hostname
         values.routedUrl = (this.parts.protocol ? (location.protocol + "//") : "") +
-            (this.parts.host ? location.host : "") +
+            (this.parts.hostname ? location.hostname : "") +
             (this.parts.port ? (":" + location.port) : "") +
             (this.parts.pathname ? location.pathname : "") +
             (this.parts.search ? location.search : "") +
@@ -68,12 +68,12 @@ Class("wipeout.di.utils.routing.route", function () {
         
         // host
         if ((tmp = /[:\/\?#]|$/.exec(route)) && tmp.index > 0) {
-            output.host = route.substring(0, tmp.index);
-            route = route.replace(output.host, "");
+            output.hostname = route.substring(0, tmp.index);
+            route = route.replace(output.hostname, "");
         }
         
         // port
-        if (output.host && route[0] === ":" && (tmp = /[\/\?#]|$/.exec(route)) && tmp.index > 0) {
+        if (output.hostname && route[0] === ":" && (tmp = /[\/\?#]|$/.exec(route)) && tmp.index > 0) {
             output.port = route.substring(1, tmp.index);
             route = route.replace(":" + output.port, "");
         }

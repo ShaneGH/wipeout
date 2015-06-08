@@ -12,7 +12,7 @@ testUtils.testWithUtils("exactMatch, route and routePart", null, true, function(
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -35,7 +35,7 @@ testUtils.testWithUtils("routeUrl partial 1", null, true, function(methods, clas
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -53,7 +53,7 @@ testUtils.testWithUtils("routeUrl partial 2", null, true, function(methods, clas
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -71,7 +71,7 @@ testUtils.testWithUtils("routeUrl full", null, true, function(methods, classes, 
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -89,7 +89,7 @@ testUtils.testWithUtils("exactMatch, missing port", null, true, function(methods
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -107,7 +107,7 @@ testUtils.testWithUtils("exactMatch, missing pathname", null, true, function(met
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -125,7 +125,7 @@ testUtils.testWithUtils("exactMatch, missing search", null, true, function(metho
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
@@ -143,7 +143,7 @@ testUtils.testWithUtils("exactMatch, missing hash", null, true, function(methods
     // act
     var op = route.parse({
         protocol: "httpptc:",
-        host: "www.sdm.something.com",
+        hostname: "www.sdm.something.com",
         port: "2345",
         pathname: "/entity/234",
         search: "?entityName=ten",
