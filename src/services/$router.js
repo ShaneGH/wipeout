@@ -1,12 +1,12 @@
-Class("wipeout.services.router", function () {
+Class("wipeout.services.$router", function () {
     
-    var router = busybody.observable.extend(function router (location) {
-        this.location = location;
+    var $router = busybody.observable.extend(function $router ($location) {
+        this.$location = $location;
         this.activate();
     });
     
     var active = [];
-    router.onPopState = onPopState;
+    $router.onPopState = onPopState;
     
     function onPopState () {
         enumerateArr(active, function (router) {
@@ -14,7 +14,7 @@ Class("wipeout.services.router", function () {
         });
     }
     
-    router.prototype.activate = function () {
+    $router.prototype.activate = function () {
         if (active.indexOf(this) !== -1)
             return;
         
@@ -24,7 +24,7 @@ Class("wipeout.services.router", function () {
         active.push(this);
     };
     
-    router.prototype.deActivate = function () {
+    $router.prototype.deActivate = function () {
         var tmp;
         while ((tmp = active.indexOf(this)) !== -1)
             active.splice(tmp, 1);
@@ -33,7 +33,7 @@ Class("wipeout.services.router", function () {
             window.removeEventListener("popstate", onPopState);
     };
     
-    router.prototype.dispose = function () {
+    $router.prototype.dispose = function () {
         try {
             this._super();
         } finally {
@@ -42,17 +42,16 @@ Class("wipeout.services.router", function () {
         }
     };
     
-    router.prototype.parse = function () {
+    $router.prototype.parse = function () {
         enumerateObj(this.routes, function (route) {
-            var vals = route.parse(this.location);
+            var vals = route.parse(this.$location);
             enumerateArr(route.callbacks, function (cb) {
                 cb.invokeIfValid(vals);
             });
         }, this);
     };
     
-    //TODO: change arg structure?
-    router.prototype.addRoute = function (route, callback, options) {
+    $router.prototype.addRoute = function (route, callback, options) {
         // options: exactMatch, unRoutedCallback, executeImmediately
         
         if (!route || !callback)
@@ -74,7 +73,7 @@ Class("wipeout.services.router", function () {
         callback.unRoutedCallback = options && options.unRoutedCallback;
         
         if (options && options.executeImmediately) {
-            var vals = this.routes[routeKey].parse(this.location);
+            var vals = this.routes[routeKey].parse(this.$location);
             callback.invokeIfValid(vals);
         }
         
@@ -119,5 +118,5 @@ Class("wipeout.services.router", function () {
         return this.hasControl = true;
     }
     
-    return router;
+    return $router;
 });

@@ -1,8 +1,8 @@
 
-Class("wipeout.services.url", function () {
+Class("wipeout.services.$url", function () {
     
     var urlCache = {};
-    function url(object, url, hydrate, hydrateCallback) {
+    function $url(object, url, hydrate, hydrateCallback) {
         if (arguments.length < 2) {
             delete object.$urlBuilder;
             return object;
@@ -57,12 +57,12 @@ Class("wipeout.services.url", function () {
         });
         
         if (hydrate)
-            wipeout.services.url.hydrate(object, hydrateCallback);
+            wipeout.services.$url.hydrate(object, hydrateCallback);
         
         return object;
     };
     
-    url.hydrate = function (object, callback) {
+    $url.hydrate = function (object, callback) {
         if (!object.$urlBuilder)
             return;
         
@@ -108,7 +108,7 @@ Class("wipeout.services.url", function () {
         
     //TODO: all of the return falses should have detailed warnings
     var relativeUrlTest = /^~/;
-    url.buildUrlFor = function (object, path) {
+    $url.buildUrlFor = function (object, path) {
         
         object = [object];
         if (path) {
@@ -156,8 +156,8 @@ Class("wipeout.services.url", function () {
         };
     };
     
-    url.post = function (object, path) {
-        var obj = url.buildUrlFor(object, path);
+    $url.post = function (object, path) {
+        var obj = $url.buildUrlFor(object, path);
         if (!obj)
             return false;
         
@@ -167,7 +167,7 @@ Class("wipeout.services.url", function () {
     };
     
     var isAFunction = {};
-    url.stringify = function (object) {
+    $url.stringify = function (object) {
         if (typeof object === "function")
             return isAFunction;
         
@@ -178,13 +178,13 @@ Class("wipeout.services.url", function () {
         if (object instanceof Array) {
             open = "[", close = "]";
             enumerateArr(object, function (object) {
-                if ((tmp = url.stringify(object)) !== isAFunction)
+                if ((tmp = $url.stringify(object)) !== isAFunction)
                     output.push(tmp);
             });
         } else {
             open = "{", close = "}";
             enumerateObj(object, function (object, i) {
-                if ((tmp = url.stringify(object)) !== isAFunction)
+                if ((tmp = $url.stringify(object)) !== isAFunction)
                     output.push(JSON.stringify(i) + ':' + tmp);
             });
         }
@@ -192,7 +192,7 @@ Class("wipeout.services.url", function () {
         return open + output.join(",") + close;
     };
     
-    url.singleton = true;
+    $url.singleton = true;
     
-    return url;
+    return $url;
 });

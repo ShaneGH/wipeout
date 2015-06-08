@@ -1,4 +1,4 @@
-module("wipeout.services.url", {
+module("wipeout.services.$url", {
     setup: function() {
     },
     teardown: function() {
@@ -10,9 +10,9 @@ testUtils.testWithUtils("add and remove", null, false, function(methods, classes
     // arrange
     // act
     // assert
-    wipeout.services.url(subject, "dasd");
+    wipeout.services.$url(subject, "dasd");
     ok(subject.$urlBuilder);
-    wipeout.services.url(subject);
+    wipeout.services.$url(subject);
     ok(!subject.$urlBuilder);
     
 });
@@ -23,7 +23,7 @@ testUtils.testWithUtils("invalid url", null, false, function(methods, classes, s
     // act
     // assert
     throws(function () {
-        wipeout.services.url(subject, "dasd{asd");
+        wipeout.services.$url(subject, "dasd{asd");
     });
 });
 
@@ -32,7 +32,7 @@ testUtils.testWithUtils("build url", "simple", false, function(methods, classes,
     // arrange
     // act
     window.globalItem = {item:"asdasd"};
-    wipeout.services.url(subject, "blabla");
+    wipeout.services.$url(subject, "blabla");
 
     //assert
     strictEqual(subject.$urlBuilder(subject), "blabla");
@@ -43,7 +43,7 @@ testUtils.testWithUtils("build url", null, false, function(methods, classes, sub
     // arrange
     // act
     window.globalItem = {item:"asdasd"};
-    wipeout.services.url(subject, "blabla/{item1}/[globalItem.item]/{item2}{itemX}");
+    wipeout.services.$url(subject, "blabla/{item1}/[globalItem.item]/{item2}{itemX}");
     subject.item1 = "something";
     subject.item2 = "another thing";
 
@@ -56,12 +56,12 @@ testUtils.testWithUtils("build url", null, false, function(methods, classes, sub
 testUtils.testWithUtils("build url and hydrate", null, false, function(methods, classes, subject, invoker) {
     
     // arrange
-    classes.mock("wipeout.services.url.hydrate", function () {
+    classes.mock("wipeout.services.$url.hydrate", function () {
         strictEqual(arguments[0], subject);
     }, 1)
     
     // act
-    wipeout.services.url(subject, "blabla", true);
+    wipeout.services.$url(subject, "blabla", true);
 
     //assert
 });
@@ -71,7 +71,7 @@ testUtils.testWithUtils("test cache", null, false, function(methods, classes, su
     // arrange
     // act
     //assert
-    strictEqual(wipeout.services.url(subject, "asdasdasdsa"), wipeout.services.url(subject, "asdasdasdsa"));
+    strictEqual(wipeout.services.$url(subject, "asdasdasdsa"), wipeout.services.$url(subject, "asdasdasdsa"));
     
 });
 
@@ -80,7 +80,7 @@ testUtils.testWithUtils("stringify", null, false, function(methods, classes, sub
     // arrange
     // act
     //assert
-    strictEqual(wipeout.services.url.stringify({
+    strictEqual(wipeout.services.$url.stringify({
         "\" \\":3,
         a:1, 
         b: '"xxx\\',
@@ -153,8 +153,8 @@ testUtils.testWithUtils("buildUrlFor", null, true, function(methods, classes, su
         }
     };
     
-    wipeout.services.url(obj.prop1, "xxx{id}");
-    wipeout.services.url(obj.prop1.prop2[0].prop3, "~/hello");
+    wipeout.services.$url(obj.prop1, "xxx{id}");
+    wipeout.services.$url(obj.prop1.prop2[0].prop3, "~/hello");
     
     // act
     var op = invoker(obj, "prop1.prop2[0].prop3.prop4");

@@ -16,6 +16,9 @@
         .value("class", "")
         .value("style", "")
         .templateProperty("formTemplate")
+        .initialize(function ($url) {
+            this.$url = $url;
+        })
         .rendered(function () {
             if (this.$hasBeenRendered)
                 return;
@@ -52,7 +55,7 @@
             return;
         
         if (this.url)
-            wipeout.services.url(this.model, this.url);
+            this.$url(this.model, this.url);
         
         //TODO: non standard
         if (!this.model.$urlBuilder && !this.url) {

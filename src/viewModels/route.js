@@ -8,9 +8,9 @@
     var route = viewModel("wipeout.viewModels.route")
         .binding("refreshModel", "getter")
         .binding("modelAndRoute", "modelAndRoute")
-        .initialize(function () {   //TODO: services
-            var router = new wipeout.services.router();
-            this.registerDisposable(router);
+        .initialize(function ($router, $url) {
+            this.$router = $router;
+            this.$url = $url;
             
             if (this.templateId)
                 this.$cachedTemplateId = this.templateId;
@@ -47,11 +47,32 @@
             return;
         
         this.$routeDisposeKey = this.registerDisposable(
-            this.router.addRoute(this.route, this.routed.bind(this), {
+            this.$router.addRoute(this.buildRoute(), this.routed.bind(this), {
                 exactMatch: this.exactMatch,
                 unRoutedCallback: this.unRouted.bind(this), 
                 executeImmediately: true
             }));
+    };
+    
+    route.buildRoute = function () {
+        if (!this.route || this.route[0] !== "~")
+            return this.route;
+        
+        var route = this.route;
+        if (this.domRoot) {
+            var i = 0;
+            while (route[0] === "~" && this.domRoot.renderContext.$parents.length > i) {
+                if (this.domRoot.renderContext.$parents[i] instanceof route)
+                    route = this.domRoot.renderContext.$parents[i].buildRoute() + route.substr(1);
+                
+                i++;
+            }
+            
+            if (route[0] !== "~")
+                return route;
+        }
+        
+        throw "Cannont subscribe to route \"" + route + "\". The \"~\" is used to locate the route of a parent control, however no parent could be found.";
     };
     
     route.routed = function ($allValues) {
@@ -60,7 +81,7 @@
         this.$routeValues = $allValues;
         
         if (this.refreshModel())
-            wipeout.services.url(null, $allValues.routedUrl, true, (function (model) {
+            this.$url(null, $allValues.routedUrl, true, (function (model) {
                 this.model = model;
                 this.synchronusTemplateChange(this.$cachedTemplateId);
             }).bind(this));

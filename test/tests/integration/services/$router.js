@@ -1,4 +1,4 @@
-module("integration: wipeout.services.router", {
+module("integration: wipeout.services.$router", {
     setup: function() {
     },
     teardown: function() {
@@ -7,7 +7,7 @@ module("integration: wipeout.services.router", {
 
 testUtils.testWithUtils("route", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router({
+    var route = new wipeout.services.$router({
         protocol: "httpptc:",
         host: "www.sdm.something.com",
         port: "2345",
@@ -43,7 +43,7 @@ testUtils.testWithUtils("route", null, true, function(methods, classes, subject,
 
 testUtils.testWithUtils("route", "minimal", true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router({
+    var route = new wipeout.services.$router({
         protocol: "httpptc:",
         host: "www.sdm.something.com",
         pathname: "/entity/234",
@@ -64,7 +64,7 @@ testUtils.testWithUtils("route", "minimal", true, function(methods, classes, sub
 
 testUtils.testWithUtils("route", "minimal, dispose", true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router({
+    var route = new wipeout.services.$router({
         protocol: "httpptc:",
         host: "www.sdm.something.com",
         pathname: "/entity/234",
@@ -90,7 +90,7 @@ testUtils.testWithUtils("route", "get, then loose control", true, function(metho
         search: "?entityName=ten",
         hash: "#thsh"
     };
-    var route = new wipeout.services.router(location), after;
+    var route = new wipeout.services.$router(location), after;
     route.addRoute("/entity/{id}", function (id) { }, {unRoutedCallback: function () {after();}});
     
     route.parse();

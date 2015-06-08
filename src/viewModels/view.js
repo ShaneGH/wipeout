@@ -173,8 +173,23 @@ Class("wipeout.viewModels.view", function () {
     view.prototype.onInitialized = function() {
         ///<summary>Called by the template engine after a view is created and all of its properties are set</summary>
 		
+        //TODO: test whether this works when vm is set as property (<wo.view><prop><my-vm></my-vm></prop></wo.view>)
+        
+        //TODM
 		enumerateArr(this.$onInitialized, function (f) {
-			f.call(this);
+            if (!f.$args)
+                f.$args = wipeout.utils.jsParse.getArgumentNames(f);
+            
+            var args = [];
+            enumerateArr(f.$args, function (a) {
+                a = wipeout.di.ioc.instance.get(a);
+                args.push(a);
+                
+                if (a instanceof busybody.dispose && !a.singleton)
+                    this.registerDisposable(a);
+            }, this);
+            
+			f.apply(this, args);
 		}, this);
     };
 
