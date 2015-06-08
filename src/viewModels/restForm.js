@@ -1,4 +1,6 @@
-(function () {
+//Incomplete, removed for now
+
+/*(function () {
     
     var formTemplate, divTemplate;    
     // execute after wipeout is initialized
@@ -66,4 +68,4 @@
     //    if (this.urlRelative)
             
     };
-}());
+}());*/
