@@ -8,7 +8,8 @@ window.wo = function (model, htmlElement) {
         htmlElement = document.body;
     else if (typeof htmlElement === "string")
         htmlElement = document.getElementById(htmlElement);
-	else if (!htmlElement)
+	
+    if (!htmlElement)
 		return;
 	
 	function woAnElement (element, elementParent) {
