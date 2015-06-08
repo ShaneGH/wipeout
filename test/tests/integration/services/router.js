@@ -7,7 +7,14 @@ module("integration: wipeout.services.router", {
 
 testUtils.testWithUtils("route", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router(false), _ok = false;
+    var route = new wipeout.services.router({
+        protocol: "httpptc:",
+        host: "www.sdm.something.com",
+        port: "2345",
+        pathname: "/entity/234",
+        search: "?entityName=ten",
+        hash: "#thsh"
+    }), _ok = false;
     route.addRoute("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={entityName}#{hash}", function (hash, protocol, subdomain, id, entityName, portNo, $allValues) {
         _ok = true;
         
@@ -28,14 +35,7 @@ testUtils.testWithUtils("route", null, true, function(methods, classes, subject,
     });
     
     // act
-    route.parse({
-        protocol: "httpptc:",
-        host: "www.sdm.something.com",
-        port: "2345",
-        pathname: "/entity/234",
-        search: "?entityName=ten",
-        hash: "#thsh"
-    });
+    route.parse();
     
     // assert
     ok(_ok);
@@ -43,20 +43,20 @@ testUtils.testWithUtils("route", null, true, function(methods, classes, subject,
 
 testUtils.testWithUtils("route", "minimal", true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router(false), _ok = false;
+    var route = new wipeout.services.router({
+        protocol: "httpptc:",
+        host: "www.sdm.something.com",
+        pathname: "/entity/234",
+        search: "?entityName=ten",
+        hash: "#thsh"
+    }), _ok = false;
     route.addRoute("/entity/{id}", function (id) {
         _ok = true;
         strictEqual(id, "234");
     });
     
     // act
-    route.parse({
-        protocol: "httpptc:",
-        host: "www.sdm.something.com",
-        pathname: "/entity/234",
-        search: "?entityName=ten",
-        hash: "#thsh"
-    });
+    route.parse();
     
     // assert
     ok(_ok);
@@ -64,44 +64,40 @@ testUtils.testWithUtils("route", "minimal", true, function(methods, classes, sub
 
 testUtils.testWithUtils("route", "minimal, dispose", true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router(false);
-    route.addRoute("/entity/{id}", function (id) {
-        ok(false);
-    }).dispose();
-    
-    // act
-    route.parse({
+    var route = new wipeout.services.router({
         protocol: "httpptc:",
         host: "www.sdm.something.com",
         pathname: "/entity/234",
         search: "?entityName=ten",
         hash: "#thsh"
     });
+    route.addRoute("/entity/{id}", function (id) {
+        ok(false);
+    }).dispose();
+    
+    // act
+    route.parse();
     
     ok(true);
 });
 
 testUtils.testWithUtils("route", "get, then loose control", true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.router(false), after;
-    route.addRoute("/entity/{id}", function (id) { }, {unRoutedCallback: function () {after();}});
-    
-    route.parse({
+    var location = {
         protocol: "httpptc:",
         host: "www.sdm.something.com",
         pathname: "/entity/234",
         search: "?entityName=ten",
         hash: "#thsh"
-    });
+    };
+    var route = new wipeout.services.router(location), after;
+    route.addRoute("/entity/{id}", function (id) { }, {unRoutedCallback: function () {after();}});
+    
+    route.parse();
     
     after = methods.method();
     
     // act
-    route.parse({
-        protocol: "",
-        host: "",
-        pathname: "",
-        search: "",
-        hash: ""
-    });
+    location.pathname = "/";
+    route.parse();
 });

@@ -13,23 +13,23 @@ Class("wipeout.di.ioc", function () {
     
     ioc.prototype.get = function (name, crc) {
         var service = this.services[name];
-        if (!(service instanceof Function))
-            return null;
-        
-        if (service.singleton)
+        if (!(service instanceof Function) || service.singleton)
             return service;
-        
-        if (!crc)
+                
+        if (!crc) {
             crc = [name];
-        else if (crc.indexOf(name) !== -1)
+        } else if (crc.indexOf(name) !== -1) {
             throw "Circular reference detected when creating services. Reference path: " + crc.join(", ") + ", " + name;
-        else {
+        } else {
             // different array for each path will help with error reporting
             crc = crc.slice();
             crc.push(name);
         }
         
         if (!this.cached[name]) {
+            if (orienteer.getInheritanceChain(service).indexOf(busybody.disposable) === -1)
+                throw "Cannot create the service \"" + name + "\". Services must inherit from busybody.disposable, or have a singleton flag.";
+            
             this.cached[name] = ioc.build(wipeout.utils.jsParse.getArgumentNames(service));
         }
         
@@ -48,7 +48,7 @@ Class("wipeout.di.ioc", function () {
         functionString.push("");
 
         enumerateArr(args, function (arg) {
-            functionString.push("if (" + arg + " && !" + arg + ".singleton)");
+            functionString.push("if (" + arg + " instanceof busybody.disposable && !" + arg + ".singleton)");
             functionString.push("\tservice.registerDisposable(" + arg + ");");
         });
 
@@ -56,7 +56,7 @@ Class("wipeout.di.ioc", function () {
         functionString.push("return service;");
 
         return new Function("service", "container", "crc", functionString.join("\n"));
-    }
+    };
     
     return ioc;
 });

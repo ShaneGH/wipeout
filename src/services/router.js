@@ -1,5 +1,10 @@
 Class("wipeout.services.router", function () {
     
+    var router = busybody.observable.extend(function router (location) {
+        this.location = location;
+        this.activate();
+    });
+    
     var active = [];
     router.onPopState = onPopState;
     
@@ -7,11 +12,6 @@ Class("wipeout.services.router", function () {
         enumerateArr(active, function (router) {
             router.parse();
         });
-    }
-    
-    function router (activate) {
-        if (activate || !arguments.length)
-            this.activate();
     }
     
     router.prototype.activate = function () {
@@ -34,17 +34,21 @@ Class("wipeout.services.router", function () {
     };
     
     router.prototype.dispose = function () {
-        this.deActivate();
-        this.routes = null;
+        try {
+            this._super();
+        } finally {
+            this.deActivate();
+            this.routes = null;
+        }
     };
     
-    router.prototype.parse = function (location) {
+    router.prototype.parse = function () {
         enumerateObj(this.routes, function (route) {
-            var vals = route.parse(location);
+            var vals = route.parse(this.location);
             enumerateArr(route.callbacks, function (cb) {
                 cb.invokeIfValid(vals);
             });
-        });
+        }, this);
     };
     
     //TODO: change arg structure?
@@ -70,7 +74,7 @@ Class("wipeout.services.router", function () {
         callback.unRoutedCallback = options && options.unRoutedCallback;
         
         if (options && options.executeImmediately) {
-            var vals = this.routes[routeKey].parse(document.location);  //TODO: use DI to get document location
+            var vals = this.routes[routeKey].parse(this.location);
             callback.invokeIfValid(vals);
         }
         

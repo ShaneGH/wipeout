@@ -34,9 +34,12 @@ testUtils.testWithUtils("get", "services and singletons", true, function(methods
             obj4: function () {
                 ok(false);
             },
-            obj5: busybody.disposable.extend(function () {
+            obj5: busybody.disposable.extend(function (obj6) {
                 this._super();
-            })
+                
+                strictEqual(obj6, services.obj6);
+            }),
+            obj6: {}
         };
     
     services.obj4.singleton = true;
@@ -62,10 +65,10 @@ testUtils.testWithUtils("get", "invalid services", true, function(methods, class
     // arrange
     var disp1 = false, disp2 = false, disp3 = false, 
         services = {
-            obj1: busybody.disposable.extend(function (obj2) {
+            obj1: busybody.disposable.extend(function (obj5) {
                 this._super();
 
-                ok(!obj2);
+                ok(!obj5);
             }),
             obj2: {}
         };
@@ -77,7 +80,6 @@ testUtils.testWithUtils("get", "invalid services", true, function(methods, class
     
     // assert
     ok(item instanceof services.obj1);
-    ok(!subject.get("obj2"));
     ok(!subject.get("obj5"));
 });
 
