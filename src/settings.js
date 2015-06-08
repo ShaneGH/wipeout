@@ -13,6 +13,9 @@ Class("wipeout.settings", function() {
             wipeout.settings[i] = setting;
         });
     }
+    
+    //TODM
+    settings.scanDom = true;
 
     settings.asynchronousTemplates = true;
     settings.displayWarnings = true;

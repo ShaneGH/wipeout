@@ -45,5 +45,6 @@ window.wo = function (model, htmlElement) {
 };
 
 window.addEventListener("load", function () {
-    window.wo();
+    if (wipeout.settings.scanDom)
+        window.wo();
 });
