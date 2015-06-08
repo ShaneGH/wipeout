@@ -6,8 +6,6 @@
     });
     
     var route = viewModel("wipeout.viewModels.route")
-        //TODO: not 100% sure if this is a good idea yet
-        .value("shareParentScope", true)
         .binding("refreshModel", "getter")
         .binding("modelAndRoute", "modelAndRoute")
         .initialize(function () {   //TODO: services
@@ -26,7 +24,7 @@
                 
                 this.$cachedTemplateId = newVal;
                 
-                if (!this.$routeIsActive)
+                if (!this.$routeValues)
                     this.synchronusTemplateChange(noTemplate);
             });
             
@@ -57,10 +55,9 @@
     };
     
     route.routed = function ($allValues) {
-        this.$routeIsActive = true;
         
         //TODM
-        this.routeValues = $allValues;
+        this.$routeValues = $allValues;
         
         if (this.refreshModel())
             wipeout.services.url(null, $allValues.routedUrl, true, (function (model) {
@@ -72,8 +69,7 @@
     };
     
     route.unRouted = function () {
-        this.$routeIsActive = false;
-        this.routeValues = null;
+        this.$routeValues = null;
         
         this.synchronusTemplateChange(noTemplate);
     };

@@ -161,8 +161,6 @@ Class("wipeout.utils.jsParse", function () {
         if (!(callback instanceof Function))
             return [];
         
-        // /\/\*[\s\S]*?\*\//mg;
-        // /\/\*.*\*\//g
         var args = /\([\w\,\s\$]*(?=\))/.exec(callback.toString().replace(/\/\*[\s\S]*?\*\//mg, ""));
         if (!args)
             return [];
