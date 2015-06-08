@@ -192,5 +192,7 @@ Class("wipeout.services.url", function () {
         return open + output.join(",") + close;
     };
     
+    url.singleton = true;
+    
     return url;
 });
