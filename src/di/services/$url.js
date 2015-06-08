@@ -1,5 +1,5 @@
 
-Class("wipeout.services.$url", function () {
+Class("wipeout.di.services.$url", function () {
     
     var urlCache = {};
     function $url(object, url, hydrate, hydrateCallback) {
@@ -57,7 +57,7 @@ Class("wipeout.services.$url", function () {
         });
         
         if (hydrate)
-            wipeout.services.$url.hydrate(object, hydrateCallback);
+            wipeout.di.services.$url.hydrate(object, hydrateCallback);
         
         return object;
     };

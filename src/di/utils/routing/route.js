@@ -1,4 +1,4 @@
-Class("wipeout.services.routing.route", function () {
+Class("wipeout.di.utils.routing.route", function () {
     
     function route (routeString, exactMatch) {
 		///<summary>Define a route</summary>
@@ -13,7 +13,7 @@ Class("wipeout.services.routing.route", function () {
                 this.uri = this.parts[i];
                 delete this.parts[i];
             } else {
-                this.parts[i] = new wipeout.services.routing.routePart(this.parts[i]);
+                this.parts[i] = new wipeout.di.utils.routing.routePart(this.parts[i]);
             }
         }
     }

@@ -1,4 +1,4 @@
-Class("wipeout.services.$router", function () {
+Class("wipeout.di.services.$router", function () {
     
     var $router = busybody.observable.extend(function $router ($location) {
         this.$location = $location;
@@ -62,7 +62,7 @@ Class("wipeout.services.$router", function () {
         var routeKey = route + (!!(options && options.exactMatch));
         
         if (!this.routes[routeKey]) {
-            this.routes[routeKey] = new wipeout.services.routing.route(route, options && options.exactMatch);
+            this.routes[routeKey] = new wipeout.di.utils.routing.route(route, options && options.exactMatch);
             this.routes[routeKey].callbacks = [callback];
         } else {
             this.routes[routeKey].callbacks.push(callback);

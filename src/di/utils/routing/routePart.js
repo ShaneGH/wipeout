@@ -1,4 +1,4 @@
-Class("wipeout.services.routing.routePart", function () {
+Class("wipeout.di.utils.routing.routePart", function () {
     
     var begin = /\{/, end = /\}/;
     function routePart (route) {

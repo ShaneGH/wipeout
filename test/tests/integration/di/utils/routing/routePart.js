@@ -1,4 +1,4 @@
-module("integration: wipeout.services.routing.routePart", {
+module("integration: wipeout.di.utils.routing.routePart", {
     setup: function() {
     },
     teardown: function() {
@@ -7,7 +7,7 @@ module("integration: wipeout.services.routing.routePart", {
 
 testUtils.testWithUtils("test 1", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.routePart("x{val}x");
+    var route = new wipeout.di.utils.routing.routePart("x{val}x");
     
     // act
     // assert
@@ -20,7 +20,7 @@ testUtils.testWithUtils("test 1", null, true, function(methods, classes, subject
 
 testUtils.testWithUtils("test 2", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.routePart("{val}x");
+    var route = new wipeout.di.utils.routing.routePart("{val}x");
     
     // act
     // assert
@@ -32,7 +32,7 @@ testUtils.testWithUtils("test 2", null, true, function(methods, classes, subject
 
 testUtils.testWithUtils("test 3", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.routePart("x{val}");
+    var route = new wipeout.di.utils.routing.routePart("x{val}");
     
     // act
     // assert
@@ -44,7 +44,7 @@ testUtils.testWithUtils("test 3", null, true, function(methods, classes, subject
 
 testUtils.testWithUtils("test 4", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.routePart("{val}");
+    var route = new wipeout.di.utils.routing.routePart("{val}");
     
     // act
     // assert

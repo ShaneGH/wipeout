@@ -1,4 +1,4 @@
-module("integration: wipeout.services.routing.route", {
+module("integration: wipeout.di.utils.routing.route", {
     setup: function() {
     },
     teardown: function() {
@@ -7,7 +7,7 @@ module("integration: wipeout.services.routing.route", {
 
 testUtils.testWithUtils("exactMatch, route and routePart", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={entityName}#{hash}", true);
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={entityName}#{hash}", true);
     
     // act
     var op = route.parse({
@@ -30,7 +30,7 @@ testUtils.testWithUtils("exactMatch, route and routePart", null, true, function(
 
 testUtils.testWithUtils("routeUrl partial 1", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("/entity/{id}");
+    var route = new wipeout.di.utils.routing.route("/entity/{id}");
     
     // act
     var op = route.parse({
@@ -48,7 +48,7 @@ testUtils.testWithUtils("routeUrl partial 1", null, true, function(methods, clas
 
 testUtils.testWithUtils("routeUrl partial 2", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}");
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}");
     
     // act
     var op = route.parse({
@@ -66,7 +66,7 @@ testUtils.testWithUtils("routeUrl partial 2", null, true, function(methods, clas
 
 testUtils.testWithUtils("routeUrl full", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={en}#{hash}");
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={en}#{hash}");
     
     // act
     var op = route.parse({
@@ -84,7 +84,7 @@ testUtils.testWithUtils("routeUrl full", null, true, function(methods, classes, 
 
 testUtils.testWithUtils("exactMatch, missing port", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com/entity/{id}?entityName={entityName}#{hash}", true);
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com/entity/{id}?entityName={entityName}#{hash}", true);
     
     // act
     var op = route.parse({
@@ -102,7 +102,7 @@ testUtils.testWithUtils("exactMatch, missing port", null, true, function(methods
 
 testUtils.testWithUtils("exactMatch, missing pathname", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}?entityName={entityName}#{hash}", true);
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}?entityName={entityName}#{hash}", true);
     
     // act
     var op = route.parse({
@@ -120,7 +120,7 @@ testUtils.testWithUtils("exactMatch, missing pathname", null, true, function(met
 
 testUtils.testWithUtils("exactMatch, missing search", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}#{hash}", true);
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}#{hash}", true);
     
     // act
     var op = route.parse({
@@ -138,7 +138,7 @@ testUtils.testWithUtils("exactMatch, missing search", null, true, function(metho
 
 testUtils.testWithUtils("exactMatch, missing hash", null, true, function(methods, classes, subject, invoker) {
     // arrange
-    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={entityName}", true);
+    var route = new wipeout.di.utils.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={entityName}", true);
     
     // act
     var op = route.parse({

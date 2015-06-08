@@ -1,4 +1,4 @@
-module("wipeout.services.routing.route", {
+module("wipeout.di.utils.routing.route", {
     setup: function() {
     },
     teardown: function() {
@@ -8,12 +8,12 @@ module("wipeout.services.routing.route", {
 testUtils.testWithUtils("constructor", null, true, function(methods, classes, subject, invoker) {
     // arrange
     var uri, rs = {}, parts = {x: {}, uri: uri = {}};
-    classes.mock("wipeout.services.routing.route.splitRoute", function () {
+    classes.mock("wipeout.di.utils.routing.route.splitRoute", function () {
         strictEqual(arguments[0], rs);
         return parts;
     }, 1);
     
-    var rp = classes.mock("wipeout.services.routing.routePart", function () {
+    var rp = classes.mock("wipeout.di.utils.routing.routePart", function () {
         strictEqual(arguments[0], parts.x);
     }, 1);
 
