@@ -41,31 +41,38 @@ Class("wipeout.services.router", function () {
     router.prototype.parse = function (location) {
         enumerateObj(this.routes, function (route) {
             var vals = route.parse(location);
-            if (vals) {
-                enumerateArr(route.callbacks, function (cb) {
-                    cb.tryInvoke(vals);
-                })
-            }
+            enumerateArr(route.callbacks, function (cb) {
+                cb.invokeIfValid(vals);
+            });
         });
     };
     
-    router.prototype.addRoute = function (route, callback, exactMatch) {
+    //TODO: change arg structure?
+    router.prototype.addRoute = function (route, callback, options) {
+        // options: exactMatch, unRoutedCallback, executeImmediately
+        
         if (!route || !callback)
             return;
         
         this.routes = this.routes || {};
         
-        var routeKey = route + (!!exactMatch);
+        var routeKey = route + (!!(options && options.exactMatch));
         
         if (!this.routes[routeKey]) {
-            this.routes[routeKey] = new wipeout.services.routing.route(route, exactMatch);
+            this.routes[routeKey] = new wipeout.services.routing.route(route, options && options.exactMatch);
             this.routes[routeKey].callbacks = [callback];
         } else {
             this.routes[routeKey].callbacks.push(callback);
         }   
         
         callback.args = wipeout.utils.jsParse.getArgumentNames(callback);
-        callback.tryInvoke = tryInvoke;
+        callback.invokeIfValid = invokeIfValid;
+        callback.unRoutedCallback = options && options.unRoutedCallback;
+        
+        if (options && options.executeImmediately) {
+            var vals = this.routes[routeKey].parse(document.location);  //TODO: use DI to get document location
+            callback.invokeIfValid(vals);
+        }
         
         return {
             dispose: (function () {
@@ -81,20 +88,31 @@ Class("wipeout.services.router", function () {
         };
     };
     
-    function tryInvoke (vals) {
+    function invokeIfValid (vals) {
+        if (!vals) {
+            if (this.hasControl && this.unRoutedCallback)
+                this.unRoutedCallback.call(null);
+            
+            return this.hasControl = false;;
+        }
+        
         var args = [];
         for (var i = 0, ii = this.args.length; i < ii; i++) {
-            if (this.args[i] === "$allValues")
+            if (this.args[i] === "$allValues") {
                 args.push(vals);
-            else if (!vals.hasOwnProperty(this.args[i]))
-                return false;
-            else
+            } else if (!vals.hasOwnProperty(this.args[i])) {
+                if (this.hasControl && this.unRoutedCallback)
+                    this.unRoutedCallback.call(null);
+                    
+                return this.hasControl = false;
+            } else {
                 args.push(vals[this.args[i]]);
+            }
         }
         
         this.apply(null, args);
         
-        return true;
+        return this.hasControl = true;
     }
     
     return router;

@@ -35,14 +35,15 @@ Class("wipeout.viewModels.content", function () {
             return anonymousTemplateId + "-" + (++i);
         }
                 
-        return function (templateStringOrXml) {
+        return function (templateStringOrXml, forceCreate) {
             ///<summary>Creates an anonymous template within the DOM and returns its id</summary>
             ///<param name="templateStringOrXml" type="String" optional="false">Gets a template id for an anonymous template</param>
+            ///<param name="forceCreate" type="Boolean" optional="true">Default: false. If set to true, will not use a cached template.</param>
             ///<returns type="String">The template id</returns>
 
             if (typeof templateStringOrXml === "string") {
 				// look in cached template strings and create template if necessary
-                if (!templateStringCache[templateStringOrXml]) {
+                if (forceCreate || !templateStringCache[templateStringOrXml]) {
                     var id = newTemplateId();
                     wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);
                     templateStringCache[templateStringOrXml] = id;
@@ -51,7 +52,7 @@ Class("wipeout.viewModels.content", function () {
                 return templateStringCache[templateStringOrXml];
             } else {
 				// look for cached id within xml or create one
-                if (!templateStringOrXml[anonymousTemplateId]) {
+                if (forceCreate || !templateStringOrXml[anonymousTemplateId]) {
                     var id = newTemplateId();
                     wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);
                     templateStringOrXml[anonymousTemplateId] = id;

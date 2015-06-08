@@ -27,5 +27,19 @@ Class("wipeout.template.initialization.viewModelPropertyValue", function () {
 		return !!op;
 	};
 	
+	viewModelPropertyValue.prototype.useAnotherProperty = function (property, value, callback) {
+        ///<summary>Create and prime a viewModelPropertyValue for another property</summary>
+        ///<param name="property" type="String">The other property name</param>
+        ///<param name="value" type="String">The other property setter</param>
+        ///<param name="callback" type="Function">A callback to execute. The first argument will be the new property</param>
+		
+		this.primed();
+        
+        var prop = new wipeout.template.initialization.viewModelPropertyValue(property, new wipeout.wml.wmlAttribute(value));
+        this._caching.push.apply(this._caching, prop.prime(this.propertyOwner, this.renderContext, function () {
+            callback(prop);
+        }));
+	};
+	
 	return viewModelPropertyValue;
 });

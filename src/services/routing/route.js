@@ -18,7 +18,7 @@ Class("wipeout.services.routing.route", function () {
         }
     }
     
-    //TODO: ignore leading and trailing slashes
+    //TODO: ignore leading and trailing slashes in all of routing
     route.prototype.parse = function (location) {
 		///<summary>Parse a document location based on this route and return the values</summary>
         ///<param name="location" type="Location" optional="true">Default: document.location. The location</param>
@@ -38,6 +38,14 @@ Class("wipeout.services.routing.route", function () {
         for (var part in this.parts)
             if (!this.parts[part].parse(location[part], values))
                 return null;
+        
+        //TODO: difference between host and hostname
+        values.routedUrl = (this.parts.protocol ? (location.protocol + "//") : "") +
+            (this.parts.host ? location.host : "") +
+            (this.parts.port ? (":" + location.port) : "") +
+            (this.parts.pathname ? location.pathname : "") +
+            (this.parts.search ? location.search : "") +
+            (this.parts.hash ? location.hash : "");
         
         return values;
     };

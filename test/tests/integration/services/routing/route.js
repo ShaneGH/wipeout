@@ -28,7 +28,25 @@ testUtils.testWithUtils("exactMatch, route and routePart", null, true, function(
     strictEqual(op.hash, "thsh");
 });
 
-testUtils.testWithUtils("non exactMatch", null, true, function(methods, classes, subject, invoker) {
+testUtils.testWithUtils("routeUrl partial 1", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    var route = new wipeout.services.routing.route("/entity/{id}");
+    
+    // act
+    var op = route.parse({
+        protocol: "httpptc:",
+        host: "www.sdm.something.com",
+        port: "2345",
+        pathname: "/entity/234",
+        search: "?entityName=ten",
+        hash: "#thsh"
+    });
+    
+    // assert
+    strictEqual(op.routedUrl, "/entity/234");
+});
+
+testUtils.testWithUtils("routeUrl partial 2", null, true, function(methods, classes, subject, invoker) {
     // arrange
     var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}");
     
@@ -43,10 +61,25 @@ testUtils.testWithUtils("non exactMatch", null, true, function(methods, classes,
     });
     
     // assert
-    strictEqual(op.protocol, "ptc");
-    strictEqual(op.subdomain, "sdm");
-    strictEqual(op.portNo, "345");
-    strictEqual(op.id, "234");
+    strictEqual(op.routedUrl, "httpptc://www.sdm.something.com:2345/entity/234");
+});
+
+testUtils.testWithUtils("routeUrl full", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    var route = new wipeout.services.routing.route("http{protocol}://www.{subdomain}.something.com:2{portNo}/entity/{id}?entityName={en}#{hash}");
+    
+    // act
+    var op = route.parse({
+        protocol: "httpptc:",
+        host: "www.sdm.something.com",
+        port: "2345",
+        pathname: "/entity/234",
+        search: "?entityName=ten",
+        hash: "#thsh"
+    });
+    
+    // assert
+    strictEqual(op.routedUrl, "httpptc://www.sdm.something.com:2345/entity/234?entityName=ten#thsh");
 });
 
 testUtils.testWithUtils("exactMatch, missing port", null, true, function(methods, classes, subject, invoker) {

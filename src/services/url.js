@@ -1,7 +1,8 @@
+
 Class("wipeout.services.url", function () {
     
     var urlCache = {};
-    function url(object, url, hydrate) {
+    function url(object, url, hydrate, hydrateCallback) {
         if (arguments.length < 2) {
             delete object.$urlBuilder;
             return object;
@@ -47,6 +48,7 @@ Class("wipeout.services.url", function () {
             urlCache[url].url = url;
         }
 
+        object = object || {};
         Object.defineProperty(object, "$urlBuilder", {
             enumerable: false,
             configurable: true,
@@ -55,12 +57,12 @@ Class("wipeout.services.url", function () {
         });
         
         if (hydrate)
-            wipeout.services.url.hydrate(object);
+            wipeout.services.url.hydrate(object, hydrateCallback);
         
         return object;
     };
     
-    url.hydrate = function (object) {
+    url.hydrate = function (object, callback) {
         if (!object.$urlBuilder)
             return;
         
@@ -75,6 +77,9 @@ Class("wipeout.services.url", function () {
                 
                 for (var i in result)
                     object[i] = result[i];
+                
+                if (callback)
+                    callback(object);
             }
         });
     };

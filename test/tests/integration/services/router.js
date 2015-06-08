@@ -80,3 +80,28 @@ testUtils.testWithUtils("route", "minimal, dispose", true, function(methods, cla
     
     ok(true);
 });
+
+testUtils.testWithUtils("route", "get, then loose control", true, function(methods, classes, subject, invoker) {
+    // arrange
+    var route = new wipeout.services.router(false), after;
+    route.addRoute("/entity/{id}", function (id) { }, {unRoutedCallback: function () {after();}});
+    
+    route.parse({
+        protocol: "httpptc:",
+        host: "www.sdm.something.com",
+        pathname: "/entity/234",
+        search: "?entityName=ten",
+        hash: "#thsh"
+    });
+    
+    after = methods.method();
+    
+    // act
+    route.parse({
+        protocol: "",
+        host: "",
+        pathname: "",
+        search: "",
+        hash: ""
+    });
+});

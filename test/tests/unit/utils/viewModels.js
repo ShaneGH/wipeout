@@ -59,11 +59,12 @@ test("getViewModel, parent and previous sibling have vms", function() {
 	</set-template>\
 </wo.content>');
 	
-	wo($("#qunit-fixture")[0]);
+	var disp = wo($("#qunit-fixture")[0]);
 	
 	// act
 	// assert
 	strictEqual(wipeout.utils.viewModels.getViewModel(document.getElementById("theItem")).xxx, 555);
+    disp.dispose();
 });
 
 test("getViewModel, shareParentScope", function() {
