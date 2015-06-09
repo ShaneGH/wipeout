@@ -25,14 +25,16 @@
             <div style="float: left">
                 <wo.list 
 								  id="theInnerlist1" 
-								  items--tw="$this.model.items" 
-								  item-template-id--s="STPTemplates/listTemplate.html" />
+								  items--tw="$model.items" 
+								  item-template-id--s="STPTemplates/listTemplate.html">
+                </wo.list>
             </div>
             <div style="float: left; margin-left: 20px;">
                 <wo.list 
 								  id="theInnerlist2" 
-								  items--tw="$this.model.items" 
-								  item-template-id--s="STPTemplates/listTemplate.html" />
+								  items--tw="$model.items" 
+								  item-template-id--s="STPTemplates/listTemplate.html">
+                </wo.list>
             </div>
             <div style="clear: both"></div>
             {{$this.totals}}
@@ -48,13 +50,13 @@
     <br/>
     <wo.content model="$this.model.deepItem" id="multiLevelTest">
         <set-template>
-            <wo.content model="$this.model.item">
+            <wo.content model="$model.item">
                 <set-template>
-                    <wo.content model="$this.model.value">
+                    <wo.content model="$model.value">
                         <supplimentary-prop>
-                            <child-view model--tw="$this.model" value--tw="$this.model">
+                            <child-view model--tw="$model" value--tw="$model.value">
                                 <set-template>
-                                    <input type="text" data-wo-value="$this.value"></input>
+                                    <input type="text" data-wo-value="console.log($this.value), $this.value"></input>
                                 </set-template>
                             </child-view>
                         </supplimentary-prop>

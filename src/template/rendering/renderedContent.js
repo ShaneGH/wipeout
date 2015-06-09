@@ -91,8 +91,6 @@ Class("wipeout.template.rendering.renderedContent", function () {
 			
             if (this.viewModel.templateId)
                 this.template(this.viewModel.templateId);
-            else if (this.viewModel instanceof wipeout.viewModels.view)
-                this.viewModel.onRendered();
         } else {
             this.appendHtml(this.viewModel.toString());
         }

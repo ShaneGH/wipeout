@@ -454,8 +454,10 @@ test("all convenience methods", function() {
     // arrange	
     var init, rend, unrend, disp, initApp;
 	wo.viewModel("vms.test1")
-		.initialize(function (temp) { init = true; 
-            strictEqual(temp, wipeout.di.services.temp);})
+		.initialize(function (temp) { 
+            init = true; 
+            strictEqual(temp, wipeout.di.services.temp);
+        })
 		.rendered(function () { rend = true; })
 		.unRendered(function () { unrend = true; })
 		.dispose(function () { disp = true; assert(); })
@@ -463,14 +465,14 @@ test("all convenience methods", function() {
         .build();
         
 	// act
-    $("#qunit-fixture").html("<vms.test1 id='vmstest'></vms.test1><js-object id='jsobj'></js-object>");
+    $("#qunit-fixture").html("<vms.test1 id='vmstest' template-id='wo.content.createAnonymousTemplate(" + '"aa"' + ")'></vms.test1><js-object id='jsobj'></js-object>");
     wo(null, "vmstest").dispose();
 
 	// assert
     function assert() {
         ok(init);
         ok(rend);
-        ok(rend);
+        ok(unrend);
         ok(disp);
         ok(initApp);
     }
@@ -489,7 +491,7 @@ test("convenience methods on view model property", function() {
     
 	// arrange	
     var init, rend, unrend, disp;
-	wo.viewModel("vms.test2")
+	wo.viewModel("vms.test3")
 		.initialize(function (temp) {
             init = true; 
             strictEqual(temp, wipeout.di.services.temp);
@@ -502,7 +504,7 @@ test("convenience methods on view model property", function() {
 	// act
     $("#qunit-fixture").html("<wo.content id='vmstest'>\
     <a-prop>\
-        <vms.test2></vms.test2>\
+        <vms.test3 template-id='wo.content.createAnonymousTemplate(" + '"aa"' + ")'></vms.test3>\
     </a-prop>\
     <set-template>\
         {{$this.aProp}}\
@@ -515,7 +517,7 @@ test("convenience methods on view model property", function() {
     function assert() {
         ok(init);
         ok(rend);
-        ok(rend);
+        ok(unrend);
         ok(disp);
     }
     

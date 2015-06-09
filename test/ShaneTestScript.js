@@ -7,11 +7,12 @@
         this._super();
         
         this.setTemplate = "<div id='theDiv'>If this text is still here something went wrong</div>\
-<wo.content id='thecontent' template='If this text is still here something went wrong'></wo.content>";
+<wo.content id='thecontent' set-template--s='If this text is still here something went wrong'></wo.content>";
     });
     
     initializeView.prototype.onRendered = function() {
         this._super();
+        
         this.templateItems.theDiv.innerHTML = this.item1 + " " + this.item2;
         this.templateItems.thecontent.setTemplate = this.item1 + " " + this.item2;
     };
@@ -81,6 +82,7 @@ var actions = [
         theModel.items.push(busybody.makeObservable({itemId: 66, itemName: "Mycroft"}));
         return "Added person (Mycroft)";
     }, function(view) {
+        debugger;
         view.templateItems.listTest.templateItems.theInnerlist1.items.splice(0, 1);
         return "Removed from one item source \"items\" (John). Expect the other to follow suit.";
     }, function(view) {
