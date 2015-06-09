@@ -69,7 +69,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
 		///<summary>Render a view model</summary>
         ///<param name="object" type="Any">The The view model</param>
         ///<param name="arrayIndex" type="Number" optional="true">The array index if the item is part of an array</param>
-		
+        
         if (object instanceof Array) {
             this.renderArray(object);
             return;
@@ -102,7 +102,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
 	
 	renderedContent.prototype.templateHasChanged = function () {
         ///<summary>Re-template the view model</summary>
-		
+        
 		this.template(this.viewModel.templateId);
 	};
     
@@ -170,6 +170,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
         ///<summary>Render the view model with the given template</summary>
         ///<param name="templateId" type="String">A pointer to the template to apply</param>
         		
+		console.log(templateId);
         // if a previous request is pending, cancel it
         if (this.asynchronous)
             this.asynchronous.cancel();
@@ -182,15 +183,14 @@ Class("wipeout.template.rendering.renderedContent", function () {
 				
 		if (!templateId) return;
         		
+        var element;
         this.asynchronous = wipeout.template.engine.instance.compileTemplate(templateId, (function (template) {
             delete this.asynchronous;
-            
+                        
             // remove loading placeholder
-            if (element) {
-                element.parentNode.removeChild(element);
-                element = null;
-            }
-            
+            if (element)
+                element();
+                        
 			this.currentTemplate = templateId;
 			
 			// add html and execute to add dynamic content
@@ -201,9 +201,13 @@ Class("wipeout.template.rendering.renderedContent", function () {
                 this.viewModel.onRendered();
         }).bind(this));
         
-        if (this.asynchronous) {            
-            var element = wipeout.utils.html.createTemplatePlaceholder(this.viewModel);
-            this.closingTag.parentNode.insertBefore(element, this.closingTag);
+        if (this.asynchronous) {
+            var el = wipeout.utils.html.createTemplatePlaceholder(this.viewModel);
+            this.closingTag.parentNode.insertBefore(el, this.closingTag);
+            this.asynchronous.onCancel(element = function () {
+                el.parentNode.removeChild(el);
+                element = null;
+            });
         }
     };
     

@@ -28,11 +28,16 @@ testUtils.testWithUtils("constructor", "", false, function(methods, classes, sub
     strictEqual(subject.items.constructor, busybody.array);
 });
 
-testUtils.testWithUtils("constructor", "item template change", false, function(methods, classes, subject, invoker) {
+testUtils.testWithUtils("onIntialized", "item template change", false, function(methods, classes, subject, invoker) {
     // arrange
 	subject = new wipeout.viewModels.list();
-	var vm1 = {}, vm2 = {__createdBylist: true}, template = wipeout.viewModels.content.createAnonymousTemplate("hello");
+    subject.onInitialized();
+	var template = wipeout.viewModels.content.createAnonymousTemplate("hello"), 
+        vm1 = {synchronusTemplateChange: stc}, 
+        vm2 = {__createdBylist: true, synchronusTemplateChange: stc};
 	subject.getItemViewModels = function () { return [vm1, vm2]; };
+    
+    function stc (templateId) { this.templateId = templateId; }
 	
 	// assert
 	subject.observe("itemTemplateId", function () {
