@@ -11,8 +11,6 @@ Class("wipeout.htmlBindingTypes.tw", function () {
         if (setter.getParser() ||
 			!/^([\$\w\s\.]|(\[\d+\]))+$/.test(val = setter.value()))
             throw "Setter \"" + val + "\" must reference only one value when binding back to the source.";
-        
-        if (setter.value(true) === "$model.items")debugger;
 
         // skip to first observable object, only paths one level off renderContext
         // or one index of renderContexts.$parents are allowed
