@@ -40,7 +40,7 @@ Class("wipeout.utils.viewModels", function () {
                 return vm.$domRoot.renderContext.$this;
         }
 		
-		var ps = htmlNode.previousSibling;
+		var ps = htmlNode.previousSibling || htmlNode.parentNode;
 		if (ps && ps.wipeoutClosing)
 			ps = ps.wipeoutClosing.openingTag.previousSibling || htmlNode.parentNode;
 				
