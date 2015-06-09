@@ -94,7 +94,7 @@ Class("wipeout.viewModels.list", function () {
     
     //virtual
     list.prototype.onItemRendered = function (item) {
-        ///<summary>Called after a new item items control is rendered</summary>
+        ///<summary>Called after a new item list is rendered</summary>
         ///<param name="item" type="wo.view" optional="false">The item rendered</param>
     };
 

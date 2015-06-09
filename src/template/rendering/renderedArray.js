@@ -14,7 +14,7 @@ Class("wipeout.template.rendering.renderedArray", function () {
 		///<summary type="Array">The array</summary>
 		this.array = array;
 		if (this.parent.parentRenderContext && this.parent.parentRenderContext.$this instanceof wipeout.viewModels.list && array === this.parent.parentRenderContext.$this.items)
-			///<summary type="wo.list">The items control if the array belongs to one</summary>
+			///<summary type="wo.list">The list if the array belongs to one</summary>
 			this.list = this.parent.parentRenderContext.$this;
 		
 		///<summary type="Array">Cache the child renderedContents </summary>

@@ -228,7 +228,7 @@ test("all convenience methods", function() {
         .build();
         
 	// act
-    $("#qunit-fixture").html("<vms.test id='vmstest'></vms.test><js-object id='jsobj'></js-object>");
+    $("#qunit-fixture").html("<vms.test id='vmstest' template-id='wo.content.createAnonymousTemplate(" + '"sad"' + ")'></vms.test><js-object id='jsobj'></js-object>");
     wo(null, "vmstest").dispose();
 
 	// assert

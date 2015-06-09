@@ -233,16 +233,23 @@ Class("wipeout.template.propertyValue", function () {
 		
         // root.prop1.prop2 etc....
         if (/^([\$\w\s\.]|(\[\d+\]))+$/.test(this.value())) {
+            
             // the renderContext will not be observable, so will not work with
             // a path observer
             
             // you cannot watch a value like $this. It must be $this.something
             var split = wipeout.utils.obj.splitPropertyName(this.value());
-            if (split.length === 1)
+            if (split.length === 1 || (split.length === 2 && split[0] === "$parents")) {
+                if (evaluateImmediately)
+                    callback(undefined, wipeout.utils.obj.getObject(this.value(), this.renderContext));
+                
                 return fakeDispose;
+            }
             
             var tmp = busybody.observe(
-                this.renderContext[split.splice(0, 1)[0]], 
+                split[0] === "$parents" ? 
+                    this.renderContext[split.splice(0, 1)[0]][split.splice(0, 1)[0]] : 
+                    this.renderContext[split.splice(0, 1)[0]], 
                 wipeout.utils.obj.joinPropertyName(split),
                 callback,
                 this.getBindingStrategyOptions());
@@ -251,7 +258,7 @@ Class("wipeout.template.propertyValue", function () {
 		      this._caching.push(tmp);
             
             if (evaluateImmediately)
-                callback(undefined, this.getter()());
+                callback(undefined, wipeout.utils.obj.getObject(this.value(), this.renderContext));
 		      
             return tmp || fakeDispose;
         }

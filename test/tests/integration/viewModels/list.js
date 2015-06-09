@@ -50,7 +50,7 @@ test("getViewModel/getViewModels", function() {
 	stop();
 });
 
-test("basic items control with filters", function() {
+test("basic list with filters", function() {
     // arrange
 	wo.filters.divisibleBy = {
 		downward: function (items, divisibleBy) {
@@ -75,11 +75,11 @@ test("basic items control with filters", function() {
 		var myItems = application.templateItems.myItems;
 		assert(5);
 		
-		var d = myItems.observe("items", function () {
+		var d = myItems.items.observe(function () {
 			d.dispose();
 			assert(4);
 			
-			d = myItems.observe("items", function () {
+			d = myItems.items.observe(function () {
 				d.dispose();
 				assert(2);
 				
@@ -107,7 +107,7 @@ test("basic items control with filters", function() {
 	stop();
 });
 
-test("basic items control. initial, add, remove, re-arrange", function() {
+test("basic list. initial, add, remove, re-arrange", function() {
     // arrange
     var id1 = "JBKJBLKJBKJLBLKJB";
     var id2 = "oidshfp9usodnf";
@@ -190,7 +190,7 @@ test("basic items control. initial, add, remove, re-arrange", function() {
 	stop();
 });
 
-test("advanced items control, creating/destroying", function() {
+test("advanced list, creating/destroying", function() {
 	
     // arrange
     var itemTemplateId = wo.content.createAnonymousTemplate('<div wo-attr-id="$this.model"></div>');
@@ -236,7 +236,7 @@ test("advanced items control, creating/destroying", function() {
 	stop();
 });
 
-test("items control, $index", function() {
+test("list, $index", function() {
 	
     // arrange
     var itemTemplateId = wo.content.createAnonymousTemplate('<div wo-attr-id="$this.model" wo-attr-data-index="$index.value"></div><wo.view id="item" index="$index.value" />');
