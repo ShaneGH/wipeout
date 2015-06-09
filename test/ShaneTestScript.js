@@ -1,7 +1,7 @@
 (function () {
-        
+    
     //wipeout.profile.profile();
-    aRoutedEvent = {};
+    aRoutedEvent = "rev";
     
     initializeView = wipeout.viewModels.content.extend(function initializeView() {
         this._super();
@@ -82,7 +82,6 @@ var actions = [
         theModel.items.push(busybody.makeObservable({itemId: 66, itemName: "Mycroft"}));
         return "Added person (Mycroft)";
     }, function(view) {
-        debugger;
         view.templateItems.listTest.templateItems.theInnerlist1.items.splice(0, 1);
         return "Removed from one item source \"items\" (John). Expect the other to follow suit.";
     }, function(view) {

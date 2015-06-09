@@ -12,7 +12,7 @@ Class("wipeout.profile.highlightVM", function () {
         this.cssClass = cssClass;
                 
         ///<Summary type="Array" generic0="Node">The nodes belonging to the view model</Summary>
-        this.nodes = vm.entireViewModelHtml();
+        this.nodes = vm instanceof wo.view ? vm.$domRoot.allHtml() : [];
         
         wipeout.utils.obj.enumerateArr(this.nodes, function(node) {
             if (node.classList)
@@ -83,13 +83,11 @@ Class("wipeout.profile.highlighter", function () {
         // dummy highlighter to deal with first dispose
         ///<Summary type="wipeout.profile.highlightVM">The current highlight vm wrapper</Summary>
         this.currentHighlighter = {dispose: function(){}};
-        
-        var _this = this;
-        
+                
         ///<Summary type="Function">A placeholder to be used in disposal</Summary>
-        this.eventHandler = function(e) {
-            _this.highlightVM(e);
-        };
+        this.eventHandler = (function(e) {
+            this.highlightVM(e);
+        }).bind(this);
         
         window.addEventListener("mousemove", this.eventHandler, false);
     };
@@ -111,20 +109,19 @@ Class("wipeout.profile.highlighter", function () {
         ///<param name="e" type="Any" optional="false">Mousemove event args</param>
         
         var newElement = document.elementFromPoint(e.clientX, e.clientY);
-        if(newElement === this.currentElement) return;
+        if (newElement === this.currentElement) return;
         this.currentElement = newElement;
         var vm = wipeout.utils.viewModels.getViewModel(this.currentElement);
         if(!vm || vm === this.currentHighlighter.vm) return;
 
         var timeout = this.__timeoutToken = {};
 
-        var _this = this;
-        setTimeout(function() {
-            if(_this.__timeoutToken !== timeout) return;
+        setTimeout((function() {
+            if(this.__timeoutToken !== timeout) return;
             
-            _this.currentHighlighter.dispose();
-            _this.currentHighlighter = new wipeout.profile.highlightVM(vm, _this.nextStyle());
-        }, 100);
+            this.currentHighlighter.dispose();
+            this.currentHighlighter = new wipeout.profile.highlightVM(vm, this.nextStyle());
+        }).bind(this), 100);
     };
     
     highlighter.prototype.dispose = function() {

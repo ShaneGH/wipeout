@@ -18,6 +18,13 @@ Class("wipeout.template.initialization.compiledInitializer", function () {
 		///<summary type="Object">Cached setters from the template</summary>
         this.setters = {};
 		
+        this.build(template);
+    };
+    
+    compiledInitializer.prototype.build = function (template) {
+		///<summary>Build the compiled initializer</summary>
+        ///<param name="template" type="wipeout.wml.wmlElement">The xml</param>
+        
         // add attribute properties
         enumerateObj(template.attributes, this.addAttribute, this);
         

@@ -20,6 +20,19 @@ testUtils.testWithUtils("getPropertyFlags", null, true, function(methods, classe
 
 testUtils.testWithUtils("constructor", null, false, function(methods, classes, subject, invoker) {
     // arrange
+    var input = {};
+    subject.build = methods.method([input]);
+	
+    // act
+	invoker(input);
+    
+    // assert
+	strictEqual(subject.setters.constructor, Object);
+});
+
+testUtils.testWithUtils("build", null, false, function(methods, classes, subject, invoker) {
+    // arrange
+    subject.setters = {};
 	var input = {
 		length: 1,
 		attributes: {
@@ -35,7 +48,6 @@ testUtils.testWithUtils("constructor", null, false, function(methods, classes, s
 	invoker(input);
     
     // assert
-	strictEqual(subject.setters.constructor, Object);
 	ok(subject.setters.model instanceof wipeout.template.initialization.viewModelPropertyValue);
 	strictEqual(subject.setters.model._value.value,  "$this.model");
 });

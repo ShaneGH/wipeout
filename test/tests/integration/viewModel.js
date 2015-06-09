@@ -1,5 +1,5 @@
 
-module("wo.viewModel", {
+module("integration: wo.viewModel", {
     setup: function () {
 		window.vms = {};
 	},
