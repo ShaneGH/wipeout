@@ -39,12 +39,26 @@ Class("wipeout.template.loader", function () {
         if (this._callbacks) {
             this._callbacks.push(success);
             
+            var onCancel;
             return {
                 cancel: (function() {
                     var i;
                     if (this._callbacks && (i = this._callbacks.indexOf(success)) !== -1)
                         this._callbacks.splice(i, 1);
-                }).bind(this)
+                    
+                    enumerateArr(onCancel, function (cb) {
+                        cb();
+                    });
+                }).bind(this),
+                onCancel: function (callback) {
+                    if (!callback)
+                        return;
+                    
+                    if (!onCancel)
+                        onCancel = [callback];
+                    else
+                        onCancel.push(callback);
+                }
             };
         }
         

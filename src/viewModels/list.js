@@ -26,19 +26,23 @@ Class("wipeout.viewModels.list", function () {
         this.registerDisposable(this.items);
         
         this.registerRoutedEvent(list.removeItem, this._removeItem, this);
-        
-        this.observe("itemTemplateId", function (oldVal, newVal) {
-			enumerateArr(this.getItemViewModels(), function (vm) {
-				if (vm.__createdBylist)
-					vm.synchronusTemplateChange(newVal);
-			});
-        }, {context: this});
     });
     
     list.addGlobalParser("itemTemplate", "template");
     list.addGlobalBindingType("itemTemplate", "templateProperty");
         
     list.removeItem = {};
+    
+    list.prototype.onInitialized = function () {
+        this._super();
+        
+        this.observe("itemTemplateId", function (oldVal, newVal) {
+            enumerateArr(this.getItemViewModels(), function (vm) {
+                if (vm.__createdBylist)
+                    vm.synchronusTemplateChange(newVal);
+            });
+        }, {context: this});
+    }
 	
     list.prototype._removeItem = function(e) {
         ///<summary>Remove an item from the item source</summary>
