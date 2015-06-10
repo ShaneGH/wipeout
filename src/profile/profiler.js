@@ -23,6 +23,7 @@ Class("wipeout.profile.profile", function () {
             profileState = {
                 highlighter: new wipeout.profile.highlighter(),
                 infoBox: div,
+                profiles: [],
                 eventHandler: function(e) {
                     if (!e.ctrlKey) return;
                     e.stopPropagation();
@@ -40,13 +41,12 @@ Class("wipeout.profile.profile", function () {
                         vms.splice(0, 0, wipeout.utils.viewModels.getViewModel(e.target));
 
                     profileState.infoBox.innerHTML = '<span style="float: right; margin-left: 10px; cursor: pointer;">x</span><br/>Open a console window and click on am item below to debug it<br/>\
-If view models do not have names, you can <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name" target="_blank">name them</a><br/>\
+If view models do not have names, you can <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name" target="_blank">name them</a>.<br/>\
 If view models have odd names ensure you are not using a minifier<br/>\
 To see more detailed render time information, enable the profiler before any view models are rendered.';
                     profileState.infoBox.firstChild.addEventListener("click", function() { profileState.infoBox.style.display = "none"; });
 
                     var html = [];
-                    profileState.profiles = [];
                     for (var i = 0, ii = vms.length; i < ii; i++) {
                         profileState.profiles.push(buildProfile(vms[i]));
                         profileState.infoBox.appendChild(profileState.profiles[i].element);
