@@ -1765,6 +1765,9 @@ compiler.registerClass("wipeoutDocs.models.howDoIApplication", "orienteer", func
 		]}, {
             header: new articleLink("Manually create a wipeout application", "manually-create-an-application"),
             items: []
+        }, {
+            header: new articleLink("Profiling", "profiling"),
+            items: []
         }/*        
             header: new articleLink("Profiling", "profiling"),
             items: []

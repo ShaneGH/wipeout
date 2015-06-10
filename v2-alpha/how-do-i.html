@@ -3399,15 +3399,18 @@ console.log(currentAccount.canWithdrawMoney());</code>
 <script id="Articles.profiling" type="text/template">
 <h1>Profiling</h1>
 
-<p>Wipeout has a built in rough and ready profiler. To open it, just open a console window and type <code>wipeout.profile.profile()</code>. Try it on this site!<br/>
+<p>Wipeout has a built in rough and ready profiler. To open it, just open a console window and type <code>wo.profile()</code>.
+    <br/>
+<button wo-click="logic: wipeout.profile.profile($this.woProfile = !$this.woProfile)">Try it on this site!</button>
+    <br/>
     With the profiler you can:
 <ul>
     <li>Highlight viewModel html by hovering over it</li>
     <li>View the hierarchy of viewModels by honding ctrl+click (does not always work with clickable items in IE)</li>
     <li>View the rendering, initialization and template compile time of each viewModel. In order to see these stats, profiling must be turned on
-    before the item is rendered, so before you call <code>ko.applyBindings(...)</code></li>
+    before the item is rendered, ideally before the initial page load is complete.</li>
     <li>Debug the viewModel and model objects themselves, by opening a console window and clicking on a viewModel header</li>
-    <li>Turn off proiling by calling <code>wipeout.profile.profile(false)</code>.</li>
+    <li>Turn off proiling by calling <code>wo.profile(false)</code>.</li>
 </ul>
 </p>
 </script>

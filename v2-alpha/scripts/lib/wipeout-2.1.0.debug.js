@@ -1240,10 +1240,10 @@ Class("busybody.arrayBase", function () {
 			this.__alteringArray = true;
 			
 			enumerateArr(this.$boundArrays, function (array) {
+				if (this[boundArrayStopKey] === array) return;
 				if (array[boundArrayStopKey])
 					throw "Circular reference in array bindings found";
 				
-				if (this[boundArrayStopKey] === array) return;
 								
 				array[boundArrayStopKey] = this;
 				array[method].apply(array, args);
@@ -3132,6 +3132,8 @@ Class("busybody.utils.observeCycleHandler", function () {
 (function (orienteer, busybody) {
     
     window.wipeout = {};
+    
+    var setup = [];
 	
 	function warn (warning, data) {
 		if (wipeout.settings.displayWarnings) {
@@ -3168,7 +3170,7 @@ var ajax = function (options) {
         }
     };
 
-    xmlhttp.open(options.type || "GET", options.url || document.location.href, options.async !== undefined ? options.async : true);
+    xmlhttp.open(options.type || "GET", options.url || document.location.href, options.hasOwnProperty("async") ? options.async : true);
     xmlhttp.send();
     
     return xmlhttp;
@@ -3460,6 +3462,9 @@ Class("wipeout.settings", function() {
             wipeout.settings[i] = setting;
         });
     }
+    
+    //TODM
+    settings.scanDom = true;
 
     settings.asynchronousTemplates = true;
     settings.displayWarnings = true;
@@ -3666,6 +3671,13 @@ Class("wipeout.template.initialization.compiledInitializer", function () {
 		///<summary type="Object">Cached setters from the template</summary>
         this.setters = {};
 		
+        this.build(template);
+    };
+    
+    compiledInitializer.prototype.build = function (template) {
+		///<summary>Build the compiled initializer</summary>
+        ///<param name="template" type="wipeout.wml.wmlElement">The xml</param>
+        
         // add attribute properties
         enumerateObj(template.attributes, this.addAttribute, this);
         
@@ -3798,6 +3810,9 @@ Class("wipeout.template.initialization.compiledInitializer", function () {
 			for (var name in this.setters)
 				if (name !== "bindingStrategy" && name !== "model")
 					disposal.push.apply(disposal, this.applyToViewModel(name, viewModel, renderContext));
+            
+            if (viewModel instanceof wo.view)
+                viewModel.onInitialized();
 		}
 		
 		return function () {
@@ -4264,8 +4279,23 @@ Class("wipeout.viewModels.view", function () {
     view.prototype.onInitialized = function() {
         ///<summary>Called by the template engine after a view is created and all of its properties are set</summary>
 		
+        //TODO: test whether this works when vm is set as property (<wo.view><prop><my-vm></my-vm></prop></wo.view>)
+        
+        //TODM
 		enumerateArr(this.$onInitialized, function (f) {
-			f.call(this);
+            if (!f.$args)
+                f.$args = wipeout.utils.jsParse.getArgumentNames(f);
+            
+            var args = [];
+            enumerateArr(f.$args, function (a) {
+                a = wipeout.di.ioc.instance.get(a);
+                args.push(a);
+                
+                if (a instanceof busybody.dispose && !a.singleton)
+                    this.registerDisposable(a);
+            }, this);
+            
+			f.apply(this, args);
 		}, this);
     };
 
@@ -4340,7 +4370,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
 		///<summary>Render a view model</summary>
         ///<param name="object" type="Any">The The view model</param>
         ///<param name="arrayIndex" type="Number" optional="true">The array index if the item is part of an array</param>
-		
+        
         if (object instanceof Array) {
             this.renderArray(object);
             return;
@@ -4373,7 +4403,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
 	
 	renderedContent.prototype.templateHasChanged = function () {
         ///<summary>Re-template the view model</summary>
-		
+        
 		this.template(this.viewModel.templateId);
 	};
     
@@ -4412,6 +4442,9 @@ Class("wipeout.template.rendering.renderedContent", function () {
         ///<summary>Remove a view model's template, leaving it blank</summary>
         ///<param name="leaveDeadChildNodes" type="Boolean">If set to true, do not remove html nodes after disposal. This is a performance optimization</param>
         
+        if (this.viewModel instanceof wipeout.viewModels.view)
+            this.viewModel.onUnrendered();
+        
 		delete this.currentTemplate;
 		
         // dispose of bindings
@@ -4429,7 +4462,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
     renderedContent.prototype.template = function(templateId) {
         ///<summary>Render the view model with the given template</summary>
         ///<param name="templateId" type="String">A pointer to the template to apply</param>
-        		
+        
         // if a previous request is pending, cancel it
         if (this.asynchronous)
             this.asynchronous.cancel();
@@ -4442,29 +4475,42 @@ Class("wipeout.template.rendering.renderedContent", function () {
 				
 		if (!templateId) return;
         		
+        var element;
         this.asynchronous = wipeout.template.engine.instance.compileTemplate(templateId, (function (template) {
             delete this.asynchronous;
-            
+                        
             // remove loading placeholder
-            if (element) {
-                element.parentNode.removeChild(element);
-                element = null;
-            }
-            
+            if (element)
+                element();
+                        
 			this.currentTemplate = templateId;
 			
 			// add html and execute to add dynamic content
-            this.disposeOfBindings = template.quickBuild(this.appendHtml.bind(this), this.renderContext);
+            this.disposeOfBindings = this.renderCurrent(template);
             this.__initialTemplate = true;
             
-            this.viewModel.onRendered();
+            if (this.viewModel instanceof wipeout.viewModels.view)
+                this.viewModel.onRendered();
         }).bind(this));
         
-        if (this.asynchronous) {            
-            var element = wipeout.utils.html.createTemplatePlaceholder(this.viewModel);
-            this.closingTag.parentNode.insertBefore(element, this.closingTag);
+        if (this.asynchronous) {
+            var el = wipeout.utils.html.createTemplatePlaceholder(this.viewModel);
+            this.closingTag.parentNode.insertBefore(el, this.closingTag);
+            this.asynchronous.onCancel(element = function () {
+                el.parentNode.removeChild(el);
+                element = null;
+            });
         }
     };
+    
+    // hook for the profiler to grab onto
+    renderedContent.prototype.renderCurrent = function (template) {
+        ///<summary>Render the current view model with the given template</summary>
+        ///<param name="template" type="wipeout.template.rendering.compiledTemplate">The template to apply</param>
+        ///<returns type="Function">A function to dispose of dynamic functionality</returns>
+        
+        return template.quickBuild(this.appendHtml.bind(this), this.renderContext)
+    }
     
     renderedContent.prototype.dispose = function(leaveDeadChildNodes) {
         ///<summary>Dispose of this view model and viewModel element, removing it from the DOM</summary>
@@ -4844,16 +4890,23 @@ Class("wipeout.template.propertyValue", function () {
 		
         // root.prop1.prop2 etc....
         if (/^([\$\w\s\.]|(\[\d+\]))+$/.test(this.value())) {
+            
             // the renderContext will not be observable, so will not work with
             // a path observer
             
             // you cannot watch a value like $this. It must be $this.something
             var split = wipeout.utils.obj.splitPropertyName(this.value());
-            if (split.length === 1)
+            if (split.length === 1 || (split.length === 2 && split[0] === "$parents")) {
+                if (evaluateImmediately)
+                    callback(undefined, wipeout.utils.obj.getObject(this.value(), this.renderContext));
+                
                 return fakeDispose;
+            }
             
             var tmp = busybody.observe(
-                this.renderContext[split.splice(0, 1)[0]], 
+                split[0] === "$parents" ? 
+                    this.renderContext[split.splice(0, 1)[0]][split.splice(0, 1)[0]] : 
+                    this.renderContext[split.splice(0, 1)[0]], 
                 wipeout.utils.obj.joinPropertyName(split),
                 callback,
                 this.getBindingStrategyOptions());
@@ -4862,7 +4915,7 @@ Class("wipeout.template.propertyValue", function () {
 		      this._caching.push(tmp);
             
             if (evaluateImmediately)
-                callback(undefined, this.getter()());
+                callback(undefined, wipeout.utils.obj.getObject(this.value(), this.renderContext));
 		      
             return tmp || fakeDispose;
         }
@@ -4937,7 +4990,7 @@ Class("wipeout.debug", function () {
                         case 1:
                             enumerateArr(node.childNodes, recursive);
                         case 8:
-                            if((vm = wipeout.utils.html.getViewModel(node)) &&
+                            if((vm = wipeout.utils.viewModels.getViewModel(node)) &&
                                values.indexOf(vm) === -1 &&
                               (!renderedItemType || vm.constructor === renderedItemType)) {
                                 values.push(vm);
@@ -4950,6 +5003,571 @@ Class("wipeout.debug", function () {
             return values;
         }
     }
+});
+
+
+Class("wipeout.di.ioc", function () {
+    
+    setup.push(function () {
+               
+        ioc.instance = new ioc(wipeout.di.services || (wipeout.di.services = {}));
+    });
+    
+    function ioc (services) {
+        this.services = services;
+        this.cached = {};
+    }
+    
+    ioc.prototype.get = function (name, crc) {
+        var service = this.services[name];
+        if (!(service instanceof Function) || service.singleton)
+            return service;
+                
+        if (!crc) {
+            crc = [name];
+        } else if (crc.indexOf(name) !== -1) {
+            throw "Circular reference detected when creating services. Reference path: " + crc.join(", ") + ", " + name;
+        } else {
+            // different array for each path will help with error reporting
+            crc = crc.slice();
+            crc.push(name);
+        }
+        
+        if (!this.cached[name]) {
+            if (orienteer.getInheritanceChain(service).indexOf(busybody.disposable) === -1)
+                throw "Cannot create the service \"" + name + "\". Services must inherit from busybody.disposable, or have a singleton flag.";
+            
+            this.cached[name] = ioc.build(wipeout.utils.jsParse.getArgumentNames(service));
+        }
+        
+        return this.cached[name](service, this, crc);
+    };
+    
+    ioc.build = function (args) {
+        var functionString = [];
+        enumerateArr(args, function(arg, i) { 
+            functionString.push("var arg" + i + " = container.get(\"" + arg + "\", crc);");
+            args[i] = "arg" + i;
+        });
+
+        functionString.push("");
+        functionString.push("service = new service(" + args.join(", ") + ");");
+        functionString.push("");
+
+        enumerateArr(args, function (arg) {
+            functionString.push("if (" + arg + " instanceof busybody.disposable && !" + arg + ".singleton)");
+            functionString.push("\tservice.registerDisposable(" + arg + ");");
+        });
+
+        functionString.push("");
+        functionString.push("return service;");
+
+        return new Function("service", "container", "crc", functionString.join("\n"));
+    };
+    
+    return ioc;
+});
+
+
+Class("wipeout.di.services.$location", function () {
+    
+    return document.location;
+});
+
+Class("wipeout.di.services.$router", function () {
+    
+    var $router = busybody.observable.extend(function $router ($location) {
+        this.$location = $location;
+        this.activate();
+    });
+    
+    var active = [];
+    $router.onPopState = onPopState;
+    
+    function onPopState () {
+        enumerateArr(active, function (router) {
+            router.parse();
+        });
+    }
+    
+    $router.prototype.activate = function () {
+        if (active.indexOf(this) !== -1)
+            return;
+        
+        if (!active.length)
+            window.addEventListener("popstate", onPopState);
+        
+        active.push(this);
+    };
+    
+    $router.prototype.deActivate = function () {
+        var tmp;
+        while ((tmp = active.indexOf(this)) !== -1)
+            active.splice(tmp, 1);
+        
+        if (!active.length)
+            window.removeEventListener("popstate", onPopState);
+    };
+    
+    $router.prototype.dispose = function () {
+        try {
+            this._super();
+        } finally {
+            this.deActivate();
+            this.routes = null;
+        }
+    };
+    
+    $router.prototype.parse = function () {
+        enumerateObj(this.routes, function (route) {
+            var vals = route.parse(this.$location);
+            enumerateArr(route.callbacks, function (cb) {
+                cb.invokeIfValid(vals);
+            });
+        }, this);
+    };
+    
+    $router.prototype.addRoute = function (route, callback, options) {
+        // options: exactMatch, unRoutedCallback, executeImmediately
+        
+        if (!route || !callback)
+            return;
+        
+        this.routes = this.routes || {};
+        
+        var routeKey = route + (!!(options && options.exactMatch));
+        
+        if (!this.routes[routeKey]) {
+            this.routes[routeKey] = new wipeout.di.utils.routing.route(route, options && options.exactMatch);
+            this.routes[routeKey].callbacks = [callback];
+        } else {
+            this.routes[routeKey].callbacks.push(callback);
+        }   
+        
+        callback.args = wipeout.utils.jsParse.getArgumentNames(callback);
+        callback.invokeIfValid = invokeIfValid;
+        callback.unRoutedCallback = options && options.unRoutedCallback;
+        
+        if (options && options.executeImmediately) {
+            var vals = this.routes[routeKey].parse(this.$location);
+            callback.invokeIfValid(vals);
+        }
+        
+        return {
+            dispose: (function () {
+                if (!route)
+                    return;
+                
+                if (this.routes && this.routes[routeKey])
+                    while ((route = this.routes[routeKey].callbacks.indexOf(callback)) !== -1)
+                        this.routes[routeKey].callbacks.splice(route, 1);
+                
+                route = null;
+            }).bind(this)
+        };
+    };
+    
+    function invokeIfValid (vals) {
+        if (!vals) {
+            if (this.hasControl && this.unRoutedCallback)
+                this.unRoutedCallback.call(null);
+            
+            return this.hasControl = false;;
+        }
+        
+        var args = [];
+        for (var i = 0, ii = this.args.length; i < ii; i++) {
+            if (this.args[i] === "$allValues") {
+                args.push(vals);
+            } else if (!vals.hasOwnProperty(this.args[i])) {
+                if (this.hasControl && this.unRoutedCallback)
+                    this.unRoutedCallback.call(null);
+                    
+                return this.hasControl = false;
+            } else {
+                args.push(vals[this.args[i]]);
+            }
+        }
+        
+        this.apply(null, args);
+        
+        return this.hasControl = true;
+    }
+    
+    return $router;
+});
+
+//Incomplete, removed for now
+
+/*
+Class("wipeout.di.services.$url", function () {
+    
+    var urlCache = {};
+    function $url(object, url, hydrate, hydrateCallback) {
+        if (arguments.length < 2) {
+            delete object.$urlBuilder;
+            return object;
+        }
+        
+        if (!urlCache[url]) {
+            var urlFunc = [], 
+                open1 = /\{/g, 
+                close1 = /\}/g,
+                open2 = /\[/g,
+                close2 = /\]/g,
+                open, close, result1, result2, lastIndex = 0;
+            
+            while (true) {
+                result1 = open1.exec(url);
+                result2 = open2.exec(url);
+                if (!result1 && !result2)
+                    break;
+                
+                if (!result1 || (result2 && result1.index > result2.index)) {
+                    open = open2;
+                    close = close2;
+                    result1 = "";
+                } else {
+                    open = open1;
+                    close = close1;
+                    result1 = "model.";
+                }
+                
+                urlFunc.push('"' + url.substring(close.lastIndex, open.lastIndex - 1) + '"');
+                close.lastIndex = open.lastIndex;
+                if (close.exec(url))
+                    urlFunc.push('encodeURIComponent(' + result1 + url.substring(open.lastIndex, close.lastIndex - 1) + ' || "null")');
+                else
+                    throw "Invalid URL: " + url;
+                
+                lastIndex = open1.lastIndex = close1.lastIndex = open2.lastIndex = close2.lastIndex = close.lastIndex;
+            }
+            
+            urlFunc.push('"' + url.substring(lastIndex) + '"');
+            
+            urlCache[url] = new Function("model", "\treturn " + urlFunc.join(" +\n\t\t\t") + ";");
+            urlCache[url].url = url;
+        }
+
+        object = object || {};
+        Object.defineProperty(object, "$urlBuilder", {
+            enumerable: false,
+            configurable: true,
+            value: urlCache[url],
+            writable: false
+        });
+        
+        if (hydrate)
+            wipeout.di.services.$url.hydrate(object, hydrateCallback);
+        
+        return object;
+    };
+    
+    $url.hydrate = function (object, callback) {
+        if (!object.$urlBuilder)
+            return;
+        
+        wipeout.utils.obj.ajax({
+            url: object.$urlBuilder(object),
+            success: function (result) {
+                var r = result.response;
+                result = convertArrays(JSON.parse(result.response));
+                for (var i in object)
+                    if (object.hasOwnProperty(i) && !result.hasOwnProperty(i))
+                        delete object[i];
+                
+                for (var i in result)
+                    object[i] = result[i];
+                
+                if (callback)
+                    callback(object);
+            }
+        });
+    };
+    
+    function convertArrays (object) {
+        if (typeof object !== "object") return;
+        
+        if (object instanceof Array) {
+            enumerateArr(object, function (obj, i) {
+                if (obj instanceof Array)
+                    obj = object[i] = busybody.array(obj);
+                
+                convertArrays(obj);
+            });
+        } else {
+            enumerateObj(object, function (obj, i) {
+                if (obj instanceof Array)
+                    obj = object[i] = busybody.array(obj);
+                
+                convertArrays(obj);
+            });
+        }
+        
+        return object;
+    }
+        
+    //TODO: all of the return falses should have detailed warnings
+    var relativeUrlTest = /^~/;
+    $url.buildUrlFor = function (object, path) {
+        
+        object = [object];
+        if (path) {
+            path = wipeout.utils.obj.splitPropertyName(path);
+            for (var i = 0, ii = path.length; i < ii; i++) {
+                if (object[i] == null)
+                    return false;
+                
+                object.push(object[i][path[i]]);
+            }
+            
+            object.reverse();
+            path.reverse();
+        } else {
+            path = [];
+        }
+        
+        if (object[0] == null)
+            return false;
+        
+        var url = [];
+        for (var i = 0, ii = object.length; i < ii; i++) {
+            if (typeof object[i].$urlBuilder !== "function") {
+                if (i > path.length - 1)
+                    return false;
+            
+                url.splice(0, 0, "/" + path[i].toString());
+            } else {
+                url.splice(0, 0, object[i].$urlBuilder(object[i]));
+                if (!relativeUrlTest.test(url[0]))
+                    break;
+            }
+        }
+        
+        if (relativeUrlTest.test(url[0]))
+            return false;
+        
+        enumerateArr(url, function (val, i) {
+            url[i] = val.replace(relativeUrlTest, "");
+        });
+        
+        return {
+            object: object[0],
+            url: url.join("")
+        };
+    };
+    
+    $url.post = function (object, path) {
+        var obj = $url.buildUrlFor(object, path);
+        if (!obj)
+            return false;
+        
+        warn("do post here");
+        
+        return obj;
+    };
+    
+    var isAFunction = {};
+    $url.stringify = function (object) {
+        if (typeof object === "function")
+            return isAFunction;
+        
+        if (typeof object !== "object" || (object && object.constructor === Date))
+            return JSON.stringify(object);
+        
+        var output = [], open, close, tmp;
+        if (object instanceof Array) {
+            open = "[", close = "]";
+            enumerateArr(object, function (object) {
+                if ((tmp = $url.stringify(object)) !== isAFunction)
+                    output.push(tmp);
+            });
+        } else {
+            open = "{", close = "}";
+            enumerateObj(object, function (object, i) {
+                if ((tmp = $url.stringify(object)) !== isAFunction)
+                    output.push(JSON.stringify(i) + ':' + tmp);
+            });
+        }
+        
+        return open + output.join(",") + close;
+    };
+    
+    $url.singleton = true;
+    
+    return $url;
+});*/
+
+Class("wipeout.di.utils.routing.route", function () {
+    
+    function route (routeString, exactMatch) {
+		///<summary>Define a route</summary>
+        ///<param name="routeString" type="String">The route</param>
+        ///<param name="exactMatch" type="Boolean" optional="true">Default: false. If true, the port, path, search and hash segments must be present in the route, if present in the url.</param>
+        
+        this.parts = route.splitRoute(routeString);
+        this.exactMatch = exactMatch;
+        
+        for (var i in this.parts) {
+            if (i === "uri") {
+                this.uri = this.parts[i];
+                delete this.parts[i];
+            } else {
+                this.parts[i] = new wipeout.di.utils.routing.routePart(this.parts[i]);
+            }
+        }
+    }
+    
+    //TODO: ignore leading and trailing slashes in all of routing
+    route.prototype.parse = function (location) {
+		///<summary>Parse a document location based on this route and return the values</summary>
+        ///<param name="location" type="Location" optional="true">Default: document.location. The location</param>
+        ///<returns type="Object">A dictionary of values, or null if the route does not match</returns>
+        
+        if (!location)
+            location = document.location;
+        
+        if (this.exactMatch &&
+            ((location.port && !this.parts.port) ||
+             (location.pathname && !this.parts.pathname) ||
+             (location.search && location.search !== "/" && !this.parts.search) ||
+             (location.hash && !this.parts.hash)))
+            return null;
+        
+        var values = {};
+        for (var part in this.parts)
+            if (!this.parts[part].parse(location[part], values))
+                return null;
+        
+        //TODO: difference between host and hostname
+        values.routedUrl = (this.parts.protocol ? (location.protocol + "//") : "") +
+            (this.parts.hostname ? location.hostname : "") +
+            (this.parts.port ? (":" + location.port) : "") +
+            (this.parts.pathname ? location.pathname : "") +
+            (this.parts.search ? location.search : "") +
+            (this.parts.hash ? location.hash : "");
+        
+        return values;
+    };
+    
+    //http://tools.ietf.org/html/rfc3986#section-3.1 (+ js variable names)
+    var protocol = /^[a-zA-Z\{]([\w\$\+\-\.\{\}])*:/;
+    
+    route.splitRoute = function (route) {
+		///<summary>Split a route into parts: protocol, host, path etc...</summary>
+        ///<param name="route" type="String">The route string</param>
+        ///<returns type="Object">A dictionary of parts</returns>
+        
+        var tmp, output = {uri: route};
+        
+        // protocol
+        if (tmp = protocol.exec(route)) {
+            output.protocol = tmp[0];
+            route = route.replace(protocol, "").replace(/^\/+/, "");
+        }
+        
+        // host
+        if ((tmp = /[:\/\?#]|$/.exec(route)) && tmp.index > 0) {
+            output.hostname = route.substring(0, tmp.index);
+            route = route.replace(output.hostname, "");
+        }
+        
+        // port
+        if (output.hostname && route[0] === ":" && (tmp = /[\/\?#]|$/.exec(route)) && tmp.index > 0) {
+            output.port = route.substring(1, tmp.index);
+            route = route.replace(":" + output.port, "");
+        }
+        
+        // pathname
+        if ((tmp = /[\?#]|$/.exec(route)) && tmp.index > 0) {
+            output.pathname = route.substring(0, tmp.index);
+            route = route.replace(output.pathname, "");
+        }
+        
+        // search
+        if (route[0] === "?") {
+            if ((tmp = /[#]|$/.exec(route)) && tmp.index > 0) {
+                output.search = route.substring(0, tmp.index);
+                route = route.replace(output.search, "");
+            }
+        }
+        
+        // hash
+        if (route[0] === "#") {
+            output.hash = route;
+        } else if (route.length) {
+            throw "Invalid url: \"" + output.uri + "\".";
+        }
+        
+        return output;
+    };
+    
+    return route;
+});
+
+Class("wipeout.di.utils.routing.routePart", function () {
+    
+    var begin = /\{/, end = /\}/;
+    function routePart (route) {
+		///<summary>Define a section of a route</summary>
+        ///<param name="route" type="String">The route section</param>
+                
+        this.parts = [];
+        var r = route, tmp;
+        while (tmp = begin.exec(route)) {
+            this.parts.push(route.substr(0, tmp.index));
+
+            if (!(tmp = end.exec(route)))
+                throw "Invalid route part: \"" + r + "\"";
+
+            this.parts.push(route.substring(this.parts[this.parts.length - 1].length + 1, tmp.index));
+            route = route.substr(tmp.index + 1);
+        }
+        
+        if (route.length)
+            this.parts.push(route);
+    }
+    
+    routePart.prototype.parse = function (uriPart, values) {
+		///<summary>Parse a string into values based on the route</summary>
+        ///<param name="uriPart" type="String">The string to parse</param>
+        ///<param name="values" type="Object" optional="true">The object to append values to. If null, will create a new object</param>
+        ///<returns type="Object">A dictionary of values, or null if the route part does not match</returns>
+        
+        var vals = [""], temp;
+        if (uriPart.indexOf(this.parts[0]) !== 0)
+            return null;
+
+        uriPart = uriPart.substr(this.parts[0].length);
+        for (var i = 2, ii = this.parts.length; i < ii; i+=2) {
+            if ((temp = uriPart.indexOf(this.parts[i])) === -1)
+                return null;
+
+            // add blank space to sync next array
+            vals.push(uriPart.substr(0, temp), "");
+            uriPart = uriPart.substr(this.parts[i].length + temp);
+        }
+        
+        // there is a final variable bit at the end
+        if (uriPart.length) {
+            if (vals.length >= this.parts.length)
+                return null;
+            
+            vals.push(uriPart);
+        }
+        
+        values = values || {};
+        for (i = 1, ii = vals.length; i < ii; i+=2) {
+            if (values[this.parts[i]])
+                throw "Duplicate url value for: \"" + this.parts[i] + "\".";
+            
+            values[this.parts[i]] = decodeURIComponent(vals[i]);
+        }
+
+        return values;
+    };
+    
+    return routePart;
 });
 
 Class("wipeout.events.event", function() {
@@ -5122,6 +5740,18 @@ Class("wipeout.events.routedEventModel", function () {
     return routedEventModel;
 });
 
+Class("wipeout.htmlBindingTypes.getter", function () {  
+    
+    return function getter(viewModel, setter, renderContext) {
+		///<summary>Set the property of the viewModel as a function getter to get the value</summary>
+        ///<param name="viewModel" type="Any">The current view model</param>
+        ///<param name="setter" type="wipeout.template.initialization.viewModelPropertyValue">The setter object</param>
+        ///<param name="renderContext" type="wipeout.template.context">The current context</param>
+        
+        viewModel[setter.name] = setter.getter();
+    }
+});
+
 Class("wipeout.htmlBindingTypes.ifTemplateProperty", function () {  
     
 	// shortcut (hack :) ) to set template id instead of the template property
@@ -5139,6 +5769,30 @@ Class("wipeout.htmlBindingTypes.ifTemplateProperty", function () {
     }
 });
 
+Class("wipeout.htmlBindingTypes.modelAndRoute", function () {  
+    
+    //TODO: set default parser of modelAndRoute to string
+    //      add a no parser parser
+    //      use a getter instead of setter.value()
+    return function modelAndRoute(viewModel, setter, renderContext) {
+		///<summary>Binds the model two ways and set's the route of a wo.route</summary>
+        ///<param name="viewModel" type="Any">The current view model</param>
+        ///<param name="setter" type="wipeout.template.initialization.viewModelPropertyValue">The setter object</param>
+        ///<param name="renderContext" type="wipeout.template.context">The current context</param>
+        
+        var val = setter.value(true).replace(/^~?\/?/, "");
+        
+        viewModel.route = "~/" + val.replace(".", "/");
+        
+        var disp;
+        setter.useAnotherProperty("model", "$model." + val.replace("/", "."), function (mSetter) {
+            disp = wipeout.htmlBindingTypes.tw(viewModel, mSetter, renderContext);
+        });
+        
+        return disp;
+    }
+});
+
 Class("wipeout.htmlBindingTypes.nb", function () {  
     
     return function nb(viewModel, setter, renderContext) {
@@ -5151,6 +5805,7 @@ Class("wipeout.htmlBindingTypes.nb", function () {
     }
 });
 
+
 Class("wipeout.htmlBindingTypes.ow", function () {  
 		
 	return function ow (viewModel, setter, renderContext) {
@@ -5159,9 +5814,23 @@ Class("wipeout.htmlBindingTypes.ow", function () {
         ///<param name="setter" type="wipeout.template.initialization.viewModelPropertyValue">The setter object</param>
         ///<param name="renderContext" type="wipeout.template.context">The current context</param>
 		
+        var arrayDispose;
 		setter.watch(function (oldVal, newVal) {
-			viewModel[setter.name] = newVal;
+            if (arrayDispose) {
+                arrayDispose.dispose();
+                arrayDispose = null;
+            }
+            
+            if (viewModel[setter.name] instanceof Array)
+                arrayDispose = busybody.tryBindArrays(newVal, viewModel[setter.name]);
+            else
+                viewModel[setter.name] = newVal;
 		}, true);
+        
+        return new busybody.disposable(function () {
+            if (arrayDispose)
+                arrayDispose.dispose();
+        });
     };
 });
 
@@ -5251,20 +5920,20 @@ Class("wipeout.htmlBindingTypes.tw", function () {
         if (setter.getParser() ||
 			!/^([\$\w\s\.]|(\[\d+\]))+$/.test(val = setter.value()))
             throw "Setter \"" + val + "\" must reference only one value when binding back to the source.";
-		
-		// skip to first observable object, only paths one level off renderContext
-		// or one index of renderContexts.$parents are allowed
-		var current = renderContext, split = busybody.utils.obj.splitPropertyName(val);
-		
-		if (busybody.getObserver(renderContext[split[0]])) {
-			renderContext = renderContext[split[0]];
-			val = busybody.utils.obj.joinPropertyName(split.slice(1));
-		} else if (split[0] === "$parents" && renderContext.$parents && busybody.getObserver(renderContext.$parents[split[1]])) {
-			renderContext = renderContext.$parents[split[1]];
-			val = busybody.utils.obj.joinPropertyName(split.slice(2));
-		}
-		
-		return busybody.tryBind(renderContext, val, viewModel, setter.name, true);
+
+        // skip to first observable object, only paths one level off renderContext
+        // or one index of renderContexts.$parents are allowed
+        var current = renderContext, split = busybody.utils.obj.splitPropertyName(val);
+
+        if (busybody.getObserver(renderContext[split[0]])) {
+            renderContext = renderContext[split[0]];
+            val = busybody.utils.obj.joinPropertyName(split.slice(1));
+        } else if (split[0] === "$parents" && renderContext.$parents && busybody.getObserver(renderContext.$parents[split[1]])) {
+            renderContext = renderContext.$parents[split[1]];
+            val = busybody.utils.obj.joinPropertyName(split.slice(2));
+        }
+
+        return busybody.tryBind(renderContext, val, viewModel, setter.name, true);
     }
 });
 
@@ -5334,7 +6003,7 @@ Class("wipeout.profile.highlightVM", function () {
         this.cssClass = cssClass;
                 
         ///<Summary type="Array" generic0="Node">The nodes belonging to the view model</Summary>
-        this.nodes = vm.entireViewModelHtml();
+        this.nodes = vm instanceof wo.view ? vm.$domRoot.allHtml() : [];
         
         wipeout.utils.obj.enumerateArr(this.nodes, function(node) {
             if (node.classList)
@@ -5405,13 +6074,11 @@ Class("wipeout.profile.highlighter", function () {
         // dummy highlighter to deal with first dispose
         ///<Summary type="wipeout.profile.highlightVM">The current highlight vm wrapper</Summary>
         this.currentHighlighter = {dispose: function(){}};
-        
-        var _this = this;
-        
+                
         ///<Summary type="Function">A placeholder to be used in disposal</Summary>
-        this.eventHandler = function(e) {
-            _this.highlightVM(e);
-        };
+        this.eventHandler = (function(e) {
+            this.highlightVM(e);
+        }).bind(this);
         
         window.addEventListener("mousemove", this.eventHandler, false);
     };
@@ -5433,20 +6100,19 @@ Class("wipeout.profile.highlighter", function () {
         ///<param name="e" type="Any" optional="false">Mousemove event args</param>
         
         var newElement = document.elementFromPoint(e.clientX, e.clientY);
-        if(newElement === this.currentElement) return;
+        if (newElement === this.currentElement) return;
         this.currentElement = newElement;
-        var vm = wipeout.utils.html.getViewModel(this.currentElement);
+        var vm = wipeout.utils.viewModels.getViewModel(this.currentElement);
         if(!vm || vm === this.currentHighlighter.vm) return;
 
         var timeout = this.__timeoutToken = {};
 
-        var _this = this;
-        setTimeout(function() {
-            if(_this.__timeoutToken !== timeout) return;
+        setTimeout((function() {
+            if(this.__timeoutToken !== timeout) return;
             
-            _this.currentHighlighter.dispose();
-            _this.currentHighlighter = new wipeout.profile.highlightVM(vm, _this.nextStyle());
-        }, 100);
+            this.currentHighlighter.dispose();
+            this.currentHighlighter = new wipeout.profile.highlightVM(vm, this.nextStyle());
+        }).bind(this), 100);
     };
     
     highlighter.prototype.dispose = function() {
@@ -5463,9 +6129,9 @@ Class("wipeout.profile.highlighter", function () {
     return highlighter;
 });
 
-Class("wipeout.profile.profile", function () { 
-    return function(){}
-    var doRendering, _initialize, rewriteTemplate, profileState;
+Class("wipeout.profile.profile", function () {
+    
+    var profileState, buildInitializer, initialize, renderCurrent, compileTemplate;
     var profile = function profile(profile) {
         ///<summary>Profile this application.</summary>
         ///<param name="profile" type="Boolean" optional="true">Switch profiling on or off. Default is true</param>
@@ -5475,91 +6141,124 @@ Class("wipeout.profile.profile", function () {
         
         if((profile && profileState) || (!profile && !profileState)) return;
         
-        doRendering = doRendering || wipeout.bindings.render.prototype.doRendering;
-        _initialize = _initialize || wipeout.viewModels.view.prototype._initialize;
-        rewriteTemplate = rewriteTemplate || wipeout.template.engine.prototype.rewriteTemplate;
+        buildInitializer = buildInitializer || wipeout.template.initialization.compiledInitializer.prototype.build;
+        initialize = initialize || wipeout.template.initialization.compiledInitializer.prototype.initialize;
+        renderCurrent = renderCurrent || wipeout.template.rendering.renderedContent.prototype.renderCurrent;
+        compileTemplate = compileTemplate || wipeout.template.engine.prototype.setTemplate;
         
         if(profile) {
+            var div = document.createElement("div");
+            div.innerHTML = '<div style="position: fixed; top: 10px; right: 10px; background-color: white; padding: 10px; border: 2px solid gray; display: none; max-height: 500px; overflow-y: scroll; z-index: 10000"></div>';
+            div = div.firstChild;
+            div.parentElement.removeChild(div);
             profileState = {
                 highlighter: new wipeout.profile.highlighter(),
-                infoBox: wipeout.utils.html.createElement(
-                    '<div style="position: fixed; top: 10px; right: 10px; background-color: white; padding: 10px; border: 2px solid gray; display: none; max-height: 500px; overflow-y: scroll; z-index: 10000"></div>'),
+                infoBox: div,
+                profiles: [],
                 eventHandler: function(e) {
                     if (!e.ctrlKey) return;
                     e.stopPropagation();
                     e.preventDefault();
 
-                    var vm = wo.html.getViewModel(e.target);
+                    var current = e.target;
+                    while ((vm = wipeout.utils.viewModels.getViewModel(current)) && !(vm instanceof wo.view))
+                        current = wipeout.template.rendering.renderedContent.getParentElement(current);
+                        
 					if(!vm) return;
-                    var vms = vm.getParents();
+                    
+                    var vms = vm.$domRoot.renderContext.$parents.slice();
                     vms.splice(0, 0, vm);
+                    if (current !== e.target)
+                        vms.splice(0, 0, wipeout.utils.viewModels.getViewModel(e.target));
 
-                    profileState.infoBox.innerHTML = '<span style="float: right; margin-left: 10px; cursor: pointer;">x</span><br/>Open a console window and click on a class to debug it<br/>\
-If view models do not have names, you can <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name">name them</a><br/>\
-If view models have odd names ensure you are not using a minifier';
+                    profileState.infoBox.innerHTML = '<span style="float: right; margin-left: 10px; cursor: pointer;">x</span><br/>Open a console window and click on am item below to debug it<br/>\
+If view models do not have names, you can <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name" target="_blank">name them</a><br/>\
+If view models have odd names ensure you are not using a minifier<br/>\
+To see more detailed render time information, enable the profiler before any view models are rendered.';
                     profileState.infoBox.firstChild.addEventListener("click", function() { profileState.infoBox.style.display = "none"; });
 
                     var html = [];
-                    for (var i = 0, ii = vms.length; i < ii; i++)
-                        profileState.infoBox.appendChild(buildProfile(vms[i]).element);
+                    for (var i = 0, ii = vms.length; i < ii; i++) {
+                        profileState.profiles.push(buildProfile(vms[i]));
+                        profileState.infoBox.appendChild(profileState.profiles[i].element);
+                    }
                     
                     profileState.infoBox.style.display = "block";
                 },
                 dispose: function() {
+                    enumerateArr(profileState.profiles, function (p) { p.dispose(); });
+                    profileState.profiles.length = 0;
+                    
                     profileState.highlighter.dispose();
                     if(profileState.infoBox.parentNode)
                         profileState.infoBox.parentNode.removeChild(profileState.infoBox);
                     
                     document.body.removeEventListener("click", profileState.eventHandler);
-                    wipeout.bindings.render.prototype.doRendering = doRendering;
-                    wipeout.viewModels.view.prototype._initialize =  _initialize;
-                    wipeout.template.engine.prototype.rewriteTemplate = rewriteTemplate;
-                }
-            };
-            
-            wipeout.bindings.render.prototype.doRendering = function() {
-                var before = new Date();
-                doRendering.apply(this, arguments);
-                var time = new Date() - before;
-                
-                if(!this.value.__woBag.profiler)
-                    this.value.__woBag.profiler = {};
-                
-                this.value.__woBag.profiler["Render time"] = time;
-                var template = document.getElementById(this.value.templateId);
-                if(template)
-                    this.value.__woBag.profiler["Template compile time"] =  wipeout.utils.domData.get(template, "rewriteTemplateTime");
-            };
-            
-             wipeout.viewModels.view.prototype._initialize = function() {
-                var before = new Date();
-                _initialize.apply(this, arguments);
-                var time = new Date() - before;
-                
-                if(!this.__woBag.profiler)
-                    this.__woBag.profiler = {};
-                
-                this.__woBag.profiler["Initialize time"] = time;
-             };
-            
-            wipeout.template.engine.prototype.rewriteTemplate = function(template) {
-                var before = new Date();
-                rewriteTemplate.apply(this, arguments);
-                var time = new Date() - before;
-                
-                var script = document.getElementById(template);
-                if (script instanceof HTMLElement) {
-                    var oldTime = wipeout.utils.domData.get(script, "rewriteTemplateTime");
-                    if(oldTime instanceof Number)
-                        time += oldTime;
                     
-                    wipeout.utils.domData.set(script, "rewriteTemplateTime", time);
+                    wipeout.template.initialization.compiledInitializer.prototype.build = buildInitializer;
+                    wipeout.template.initialization.compiledInitializer.prototype.initialize = initialize;
+                    wipeout.template.rendering.renderedContent.prototype.renderCurrent = renderCurrent;
+                    wipeout.template.rendering.compiledTemplate.prototype.compile = compileTemplate;
                 }
+            };
+            
+            wipeout.template.initialization.compiledInitializer.prototype.build = function () {
+                
+                var before = new Date();
+                var op = buildInitializer.apply(this, arguments);
+                this.$buildTime = (new Date() - before) + "ms";
+                
+                return op;
+            };
+            
+            wipeout.template.initialization.compiledInitializer.prototype.initialize = function (vm) {
+                
+                if (!vm.$profiler)
+                    vm.$profiler = {};
+                
+                var before = new Date();
+                var op = initialize.apply(this, arguments);
+                vm.$profiler["Initilize time"] = (new Date() - before) + "ms";
+                
+                if (this.hasOwnProperty("$buildTime")) {
+                    vm.$profiler["Initializer build time"] = this.$buildTime;
+                    delete this.$buildTime;
+                }
+                
+                return op;
+            };
+            
+            wipeout.template.engine.prototype.setTemplate = function () {
+                
+                var before = new Date();
+                var op = compileTemplate.apply(this, arguments);
+                op.$compileTime = (new Date() - before) + "ms";
+                
+                return op;
+            };
+            
+            wipeout.template.rendering.renderedContent.prototype.renderCurrent = function (template) {
+                
+                if (!this.viewModel)
+                    return renderCurrent.apply(this, arguments);;
+                
+                if (!this.viewModel.$profiler)
+                    this.viewModel.$profiler = {};
+                
+                var before = new Date();
+                var op = renderCurrent.apply(this, arguments);
+                this.viewModel.$profiler["Render time"] = (new Date() - before) + "ms";
+                
+                if (template.hasOwnProperty("$compileTime")) {
+                    this.viewModel.$profiler["Template compile time"] = template.$compileTime;
+                    delete template.$compileTime;
+                }
+                
+                return op;
             };
             
             document.body.appendChild(profileState.infoBox);
             document.body.addEventListener("click", profileState.eventHandler, false);
-            
         } else {
             profileState.dispose();            
             profileState = null;
@@ -5568,13 +6267,12 @@ If view models have odd names ensure you are not using a minifier';
         return;
     };
     
-    var viewVm = new Function("viewModel", "model", "//Use your browser's debugger to inspect the model and view model\ndebugger;");
+    var viewVm = new Function("viewModel", "model", "console.log(viewModel);\nconsole.log(model);\n\n//Use your browser's debugger to inspect the model and view model\ndebugger;");
     
 	var functionName = /^function\s*([^\s(]+)/;
     var buildProfile = function(vm) {
                 
         var div = document.createElement('div');
-        wipeout.utils.domData.set(div, wipeout.bindings.wipeout.utils.wipeoutKey, vm);
         
 		// IE doesn't support name
 		var tmp;		
@@ -5583,23 +6281,22 @@ If view models have odd names ensure you are not using a minifier';
 			((tmp = vm.constructor.toString().match(functionName)) ? tmp[1] : 'unknown vm type');
 			
         var innerHTML = ["<h4 style='cursor: pointer; margin-bottom: 5px;'>" + fn + (vm.id ? (" #" + vm.id) : "") + "</h4>"];
-        if(vm.__woBag.profiler)
-            for(var i in vm.__woBag.profiler)
-                innerHTML.push("<label>" + i + ":</label> " + vm.__woBag.profiler[i]);
+        if(vm.$profiler)
+            for(var i in vm.$profiler)
+                innerHTML.push("<label>" + i + ":</label> " + vm.$profiler[i]);
         
         div.innerHTML += innerHTML.join("<br />");
         
         function listener() {
-            viewVm(vm, vm.model());
+            viewVm(vm, vm.model);
         }
         
         div.firstChild.addEventListener("click", listener, false);
         
         return {
             element: div,
-            dispsoe: function() {
+            dispose: function() {
                 div.firstChild.removeEventListener("click", listener);
-                wipeout.utils.domData.clear(div);
             }
         };
     };    
@@ -5894,6 +6591,20 @@ Class("wipeout.template.initialization.viewModelPropertyValue", function () {
 		return !!op;
 	};
 	
+	viewModelPropertyValue.prototype.useAnotherProperty = function (property, value, callback) {
+        ///<summary>Create and prime a viewModelPropertyValue for another property</summary>
+        ///<param name="property" type="String">The other property name</param>
+        ///<param name="value" type="String">The other property setter</param>
+        ///<param name="callback" type="Function">A callback to execute. The first argument will be the new property</param>
+		
+		this.primed();
+        
+        var prop = new wipeout.template.initialization.viewModelPropertyValue(property, new wipeout.wml.wmlAttribute(value));
+        this._caching.push.apply(this._caching, prop.prime(this.propertyOwner, this.renderContext, function () {
+            callback(prop);
+        }));
+	};
+	
 	return viewModelPropertyValue;
 });
 
@@ -5938,12 +6649,26 @@ Class("wipeout.template.loader", function () {
         if (this._callbacks) {
             this._callbacks.push(success);
             
+            var onCancel;
             return {
                 cancel: (function() {
                     var i;
                     if (this._callbacks && (i = this._callbacks.indexOf(success)) !== -1)
                         this._callbacks.splice(i, 1);
-                }).bind(this)
+                    
+                    enumerateArr(onCancel, function (cb) {
+                        cb();
+                    });
+                }).bind(this),
+                onCancel: function (callback) {
+                    if (!callback)
+                        return;
+                    
+                    if (!onCancel)
+                        onCancel = [callback];
+                    else
+                        onCancel.push(callback);
+                }
             };
         }
         
@@ -6995,7 +7720,7 @@ Class("wipeout.template.rendering.renderedArray", function () {
 		///<summary type="Array">The array</summary>
 		this.array = array;
 		if (this.parent.parentRenderContext && this.parent.parentRenderContext.$this instanceof wipeout.viewModels.list && array === this.parent.parentRenderContext.$this.items)
-			///<summary type="wo.list">The items control if the array belongs to one</summary>
+			///<summary type="wo.list">The list if the array belongs to one</summary>
 			this.list = this.parent.parentRenderContext.$this;
 		
 		///<summary type="Array">Cache the child renderedContents </summary>
@@ -7439,13 +8164,9 @@ Class("wipeout.template.rendering.viewModelElement", function () {
 		};
 		
         // run onInitialized after value initialization is complete
-        if (this.createdViewModel instanceof wipeout.viewModels.view) {
-            this.createdViewModel.onInitialized();
-			
-			if (!this.renderContext.$parentContext) {
-				this.createdViewModel.onApplicationInitialized();
-			}
-		}
+        if (this.createdViewModel instanceof wipeout.viewModels.view && !this.renderContext.$parentContext) {
+            this.createdViewModel.onApplicationInitialized();
+        }
         
         this.render(this.createdViewModel);
 		this.render = blockRendering;
@@ -7622,7 +8343,7 @@ Class("wipeout.utils.find", function () {
         
         var getItem = getModel ? 
             function(item) {
-                return item && item.$this instanceof wo.view ? item.$this.model : null;
+                return item && item.$this instanceof wipeout.viewModels.view ? item.$this.model : null;
             } : 
             function(item) { 
                 return item ? item.$this : null;
@@ -7737,24 +8458,7 @@ Class("wipeout.utils.find", function () {
 });
 
 
-Class("wipeout.utils.html", function () { 
-    
-    var getViewModel = function(forHtmlNode) {
-        ///<summary>Get the view model associated with a html node</summary>
-        ///<param name="forHtmlNode" type="HTMLNode">The element which is the root node of a wo.view</param>
-        ///<returns type="wo.view">The view model associated with this node, or null</returns>
-        
-		if (!forHtmlNode)
-			return null;
-				
-        if (forHtmlNode.wipeoutOpening)
-			return forHtmlNode.wipeoutOpening.viewModel;
-		
-		if (forHtmlNode.wipeoutClosing)
-			return forHtmlNode.wipeoutClosing.viewModel;
-		
-		return getViewModel(wipeout.template.rendering.renderedContent.getParentElement(forHtmlNode));
-    };
+Class("wipeout.utils.html", function () {
     
     var createTemplatePlaceholder = function(forViewModel) {
         ///<summary>Create a html node so serve as a temporary template while the template loads asynchronously</summary>
@@ -7770,7 +8474,6 @@ Class("wipeout.utils.html", function () {
     };
     
     html.createTemplatePlaceholder = createTemplatePlaceholder;
-    html.getViewModel = getViewModel
     
     return html;    
 });
@@ -7934,7 +8637,23 @@ Class("wipeout.utils.jsParse", function () {
 		return toString;
 	};
     
+    function getArgumentNames (callback) {
+        if (!(callback instanceof Function))
+            return [];
+        
+        var args = /\([\w\,\s\$]*(?=\))/.exec(callback.toString().replace(/\/\*[\s\S]*?\*\//mg, ""));
+        if (!args)
+            return [];
+        
+        args = args[0].substr(1).replace(/\s/g, "");
+        if (!args.length)
+            return [];
+        
+        return args.split(",");
+    }
+    
     function jsParse() { };
+    jsParse.getArgumentNames = getArgumentNames;
     jsParse.removeCommentsTokenStrings = removeCommentsTokenStrings;
     jsParse.removeCommentsTokenStringsAndBrackets = removeCommentsTokenStringsAndBrackets;
     return jsParse;
@@ -7957,25 +8676,36 @@ Class("wipeout.utils.viewModels", function () {
 		return /^js[A-Z]/.test(name) ? name.substr(2) : name;
 	};
 	
-	viewModels.getViewModel = function (htmlNode, endAt) {
+	viewModels.getViewModel = function (htmlNode, includeNoScopeItems, endAt) {
         ///<summary>Get the view model which rendered this node (if any)</summary>
         ///<param name="htmlNode" type="Element">The node</param>
+        ///<param name="includeNoScopeItems" type="Boolean" optional="true">Default: false. If false, will ignore view models with shareParentScope == true</param>
         ///<param name="endAt" type="Element" optional="true">An element which definitely has not view model, meaning all parent elements will also not have a view model.</param>
         ///<returns type="Object">The view model</returns>
 		
 		if (!htmlNode || htmlNode === endAt)
 			return;
 		
+        var vm;
 		if (htmlNode.wipeoutOpening)
-			return htmlNode.wipeoutOpening.viewModel;
-		if (htmlNode.wipeoutClosing)
-			return htmlNode.wipeoutClosing.viewModel;
+			vm = htmlNode.wipeoutOpening.viewModel;
+		else if (htmlNode.wipeoutClosing)
+			vm = htmlNode.wipeoutClosing.viewModel;
+        
+        if (vm) {
+            if (includeNoScopeItems || !vm.shareParentScope)
+                return vm;
+            
+            // shortcut if available
+            if (vm.$domRoot && vm.$domRoot.renderContext)
+                return vm.$domRoot.renderContext.$this;
+        }
 		
-		var ps = htmlNode.previousSibling;
+		var ps = htmlNode.previousSibling || htmlNode.parentNode;
 		if (ps && ps.wipeoutClosing)
 			ps = ps.wipeoutClosing.openingTag.previousSibling || htmlNode.parentNode;
 				
-		return viewModels.getViewModel(ps);
+		return viewModels.getViewModel(ps, endAt);
 	};
 	
 	viewModels.getViewModelConstructor = function (wmlElement) {
@@ -8133,7 +8863,7 @@ function viewModel (name, extend, doNotWarn) {
 		
 	extend = extend || wipeout.viewModels.view;
 	
-	var isViewModel = orienteer.getInheritanceChain(extend).indexOf(wo.view) !== -1;
+	var isViewModel = orienteer.getInheritanceChain(extend).indexOf(wipeout.viewModels.view) !== -1;
 	var isDisposable = orienteer.getInheritanceChain(extend).indexOf(busybody.disposable) !== -1;
 	
 	var $constructor,
@@ -8503,14 +9233,15 @@ Class("wipeout.viewModels.content", function () {
             return anonymousTemplateId + "-" + (++i);
         }
                 
-        return function (templateStringOrXml) {
+        return function (templateStringOrXml, forceCreate) {
             ///<summary>Creates an anonymous template within the DOM and returns its id</summary>
             ///<param name="templateStringOrXml" type="String" optional="false">Gets a template id for an anonymous template</param>
+            ///<param name="forceCreate" type="Boolean" optional="true">Default: false. If set to true, will not use a cached template.</param>
             ///<returns type="String">The template id</returns>
 
             if (typeof templateStringOrXml === "string") {
 				// look in cached template strings and create template if necessary
-                if (!templateStringCache[templateStringOrXml]) {
+                if (forceCreate || !templateStringCache[templateStringOrXml]) {
                     var id = newTemplateId();
                     wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);
                     templateStringCache[templateStringOrXml] = id;
@@ -8519,7 +9250,7 @@ Class("wipeout.viewModels.content", function () {
                 return templateStringCache[templateStringOrXml];
             } else {
 				// look for cached id within xml or create one
-                if (!templateStringOrXml[anonymousTemplateId]) {
+                if (forceCreate || !templateStringOrXml[anonymousTemplateId]) {
                     var id = newTemplateId();
                     wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);
                     templateStringOrXml[anonymousTemplateId] = id;
@@ -8682,19 +9413,23 @@ Class("wipeout.viewModels.list", function () {
         this.registerDisposable(this.items);
         
         this.registerRoutedEvent(list.removeItem, this._removeItem, this);
-        
-        this.observe("itemTemplateId", function (oldVal, newVal) {
-			enumerateArr(this.getItemViewModels(), function (vm) {
-				if (vm.__createdBylist)
-					vm.synchronusTemplateChange(newVal);
-			});
-        }, {context: this});
     });
     
     list.addGlobalParser("itemTemplate", "template");
     list.addGlobalBindingType("itemTemplate", "templateProperty");
         
     list.removeItem = {};
+    
+    list.prototype.onInitialized = function () {
+        this._super();
+        
+        this.observe("itemTemplateId", function (oldVal, newVal) {
+            enumerateArr(this.getItemViewModels(), function (vm) {
+                if (vm.__createdBylist)
+                    vm.synchronusTemplateChange(newVal);
+            });
+        }, {context: this});
+    }
 	
     list.prototype._removeItem = function(e) {
         ///<summary>Remove an item from the item source</summary>
@@ -8750,7 +9485,7 @@ Class("wipeout.viewModels.list", function () {
     
     //virtual
     list.prototype.onItemRendered = function (item) {
-        ///<summary>Called after a new item items control is rendered</summary>
+        ///<summary>Called after a new item list is rendered</summary>
         ///<param name="item" type="wo.view" optional="false">The item rendered</param>
     };
 
@@ -8776,6 +9511,180 @@ Class("wipeout.viewModels.list", function () {
 
     return list;
 });
+
+//Incomplete, removed for now
+
+/*(function () {
+    
+    var formTemplate, divTemplate;    
+    // execute after wipeout is initialized
+    setup.push(function () {
+        //TODM: style and class attributes
+        formTemplate = wipeout.viewModels.content.createAnonymousTemplate('<form wo-submit="$this.submit(element)" wo-attr-class="$this.class" wo-attr-style="$this.style">\
+            <wo.view template-id="$this.formTemplateId" share-parent-scope="true"></wo.view>\
+        </form>');
+        divTemplate = wipeout.viewModels.content.createAnonymousTemplate('<div wo-attr-class="$this.class" wo-attr-style="$this.style">\
+            <wo.view template-id="$this.formTemplateId" share-parent-scope="true"></wo.view>\
+        </div>');
+    });
+    
+    var restForm = viewModel("wipeout.viewModels.restForm")
+        .value("class", "")
+        .value("style", "")
+        .templateProperty("formTemplate")
+        .initialize(function ($url) {
+            this.$url = $url;
+        })
+        .rendered(function () {
+            if (this.$hasBeenRendered)
+                return;
+            
+            this.$hasBeenRendered = true;
+            var current = this.$domRoot.openingTag;
+            while (current) {
+                if (current.nodeType === 1 && current.localName === "form") {
+                    this.synchronusTemplateChange(divTemplate);
+                    return;
+                }
+                    
+                current = current.parentElement;
+            }
+            
+            this.synchronusTemplateChange(formTemplate);
+        })
+        .build();
+    
+    restForm.submit = function (element) {
+        
+        // form might be a child vm
+        //TODM document.activeElement
+        var form = wipeout.utils.viewModels.getViewModel(document.activeElement);
+        if (form instanceof wipeout.viewModels.restForm)
+            form.submitForm();
+        else
+            this.submitForm();
+    };
+    
+    restForm.submitForm = function () {
+        
+        if (!this.model)
+            return;
+        
+        if (this.url)
+            this.$url(this.model, this.url);
+        
+        //TODO: non standard
+        if (!this.model.$urlBuilder && !this.url) {
+            warn("Cannot submit form, there is no url defined on the model or the form");
+            return;
+        }
+        
+    //    if (this.urlRelative)
+            
+    };
+}());*/
+
+//Incomplete, removed for now
+
+/*(function () {
+    
+    var noTemplate;
+    setup.push(function () {
+        noTemplate = wipeout.viewModels.content.createAnonymousTemplate("", true);
+    });
+    
+    var route = viewModel("wipeout.viewModels.route")
+        .binding("refreshModel", "getter")
+        .binding("modelAndRoute", "modelAndRoute")
+        .initialize(function ($router, $url) {
+            this.$router = $router;
+            this.$url = $url;
+            
+            if (this.templateId)
+                this.$cachedTemplateId = this.templateId;
+            this.templateId = noTemplate;
+            
+            this.observe("route", this.reRegister);
+            this.observe("exactMatch", this.reRegister);
+            this.observe("templateId", function (oldVal, newVal) {
+                if (newVal === noTemplate)
+                    return;
+                
+                this.$cachedTemplateId = newVal;
+                
+                if (!this.$routeValues)
+                    this.synchronusTemplateChange(noTemplate);
+            });
+            
+            this.reRegister();
+        })
+        .build();
+    
+    //TODM: can be overridden by refreshModel property
+    route.refreshModel = function () {
+        return this.model == null;
+    };
+    
+    route.reRegister = function () {
+        if (this.$routeDisposeKey) {
+            this.disposeOf(this.$routeDisposeKey);
+            this.$routeDisposeKey = null;
+        }
+        
+        if (!this.route)
+            return;
+        
+        this.$routeDisposeKey = this.registerDisposable(
+            this.$router.addRoute(this.buildRoute(), this.routed.bind(this), {
+                exactMatch: this.exactMatch,
+                unRoutedCallback: this.unRouted.bind(this), 
+                executeImmediately: true
+            }));
+    };
+    
+    route.buildRoute = function () {
+        if (!this.route || this.route[0] !== "~")
+            return this.route;
+        
+        var route = this.route;
+        if (this.domRoot) {
+            var i = 0;
+            while (route[0] === "~" && this.domRoot.renderContext.$parents.length > i) {
+                if (this.domRoot.renderContext.$parents[i] instanceof route)
+                    route = this.domRoot.renderContext.$parents[i].buildRoute() + route.substr(1);
+                
+                i++;
+            }
+            
+            if (route[0] !== "~")
+                return route;
+        }
+        
+        throw "Cannont subscribe to route \"" + route + "\". The \"~\" is used to locate the route of a parent control, however no parent could be found.";
+    };
+    
+    route.routed = function ($allValues) {
+        
+        //TODM
+        this.$routeValues = $allValues;
+        
+        if (this.refreshModel())
+            this.$url(null, $allValues.routedUrl, true, (function (model) {
+                this.model = model;
+                this.synchronusTemplateChange(this.$cachedTemplateId);
+            }).bind(this));
+        else
+            this.synchronusTemplateChange(this.$cachedTemplateId);
+    };
+    
+    route.unRouted = function () {
+        this.$routeValues = null;
+        
+        this.synchronusTemplateChange(noTemplate);
+    };
+    
+    return route;
+}());*/
 
 (function () {
  
@@ -9101,7 +10010,7 @@ Class("wipeout.wml.wmlString", function () {
 
 //http://www.w3.org/TR/html-markup/syntax.html
 Class("wipeout.wml.wmlParser", function () {  
-        
+    
     // tags which cannot go into a <div /> tag, along with the tag they should go into
     wmlParser.specialTags = {
         area: "map",
@@ -9585,11 +10494,12 @@ window.wo = function (model, htmlElement) {
         htmlElement = document.body;
     else if (typeof htmlElement === "string")
         htmlElement = document.getElementById(htmlElement);
-	else if (!htmlElement)
+	
+    if (!htmlElement)
 		return;
 	
 	function woAnElement (element, elementParent) {
-		if (wipeout.utils.viewModels.getViewModel(element, elementParent)) {
+		if (wipeout.utils.viewModels.getViewModel(element, true, elementParent)) {
 			warn("Attempting to create a wo application twice.", element);
 			return;
 		}
@@ -9621,7 +10531,8 @@ window.wo = function (model, htmlElement) {
 };
 
 window.addEventListener("load", function () {
-    window.wo();
+    if (wipeout.settings.scanDom)
+        window.wo();
 });
 
 
@@ -9659,6 +10570,13 @@ expose("triggerEvent", function triggerEvent (forObject, event, eventArgs) {
 enumerateObj(wipeout.viewModels, function(vm, name) {
 	expose(name, vm);
 });
+
+enumerateArr(setup, function(f) {
+    f();
+});
+
+setup = null;
+
 }(window.orienteer, window.busybody));
 
 }());
