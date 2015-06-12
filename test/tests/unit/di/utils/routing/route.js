@@ -117,9 +117,43 @@ testUtils.testWithUtils("splitRoute", null, true, function(methods, classes, sub
                 url += vals[arguments[i]];
             else
                 url += arguments[i];
-                 
+        
         var op = invoker(url);
         for (var i = 0, ii = arguments.length; i < ii; i++)
             strictEqual(op[arguments[i]], vals[arguments[i]]);
+    }
+});
+
+testUtils.testWithUtils("splitRoute", "~ in path", true, function(methods, classes, subject, invoker) {
+    
+    // arrange
+    var aru = wipeout.settings.applicationRootUrl;
+    try {
+        wipeout.settings.applicationRootUrl = "asdasdads";
+    
+        // act
+        var op = invoker("~/askjbdkjasd/asijdaskj");
+
+        // assert
+        strictEqual(op.pathname, "/asdasdads/askjbdkjasd/asijdaskj");
+    } finally {
+        wipeout.settings.applicationRootUrl = aru;
+    }
+});
+
+testUtils.testWithUtils("splitRoute", "~ in path but with host", true, function(methods, classes, subject, invoker) {
+    
+    // arrange
+    var aru = wipeout.settings.applicationRootUrl;
+    try {
+        wipeout.settings.applicationRootUrl = "asdasdads";
+    
+        // act
+        var op = invoker("www.something.com~/askjbdkjasd/asijdaskj");
+
+        // assert
+        strictEqual(op.pathname, "~/askjbdkjasd/asijdaskj");
+    } finally {
+        wipeout.settings.applicationRootUrl = aru;
     }
 });

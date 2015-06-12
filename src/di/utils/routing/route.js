@@ -79,24 +79,26 @@ Class("wipeout.di.utils.routing.route", function () {
         // protocol
         if (tmp = protocol.exec(route)) {
             output.protocol = tmp[0];
-            route = route.replace(protocol, "").replace(/^\/+/, "");
+            route = route.replace(protocol, "").replace(/^((~?)\/)+/, "");
         }
         
         // host
-        if ((tmp = /[:\/\?#]|$/.exec(route)) && tmp.index > 0) {
+        if ((tmp = /:|((~?)\/)|\?|#|$/.exec(route)) && tmp.index > 0) {
             output.hostname = route.substring(0, tmp.index);
             route = route.replace(output.hostname, "");
         }
         
         // port
-        if (output.hostname && route[0] === ":" && (tmp = /[\/\?#]|$/.exec(route)) && tmp.index > 0) {
+        if (output.hostname && route[0] === ":" && (tmp = /((~?)\/)|\?|#|$/.exec(route)) && tmp.index > 0) {
             output.port = route.substring(1, tmp.index);
             route = route.replace(":" + output.port, "");
         }
         
         // pathname
-        if ((tmp = /[\?#]|$/.exec(route)) && tmp.index > 0) {
+        if ((tmp = /\?|#|$/.exec(route)) && tmp.index > 0) {
             output.pathname = route.substring(0, tmp.index);
+            route = route.replace(output.pathname, "");
+            
             if (output.pathname[0] === "~" && !output.protocol && !output.hostname && !output.port) {
                 var leadingSlash = wipeout.settings.applicationRootUrl && wipeout.settings.applicationRootUrl[0] !== "/" ? "/" : "";
                 var trailingSlash = wipeout.settings.applicationRootUrl && 
@@ -108,8 +110,6 @@ Class("wipeout.di.utils.routing.route", function () {
                     trailingSlash +
                     output.pathname.substr(1);
             }
-            
-            route = route.replace(output.pathname, "");
         }
         
         // search
