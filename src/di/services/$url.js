@@ -1,6 +1,4 @@
-//Incomplete, removed for now
 
-/*
 Class("wipeout.di.services.$url", function () {
     
     var urlCache = {};
@@ -197,4 +195,4 @@ Class("wipeout.di.services.$url", function () {
     $url.singleton = true;
     
     return $url;
-});*/
+});

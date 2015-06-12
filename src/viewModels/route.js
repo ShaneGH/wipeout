@@ -1,6 +1,4 @@
-//Incomplete, removed for now
-
-/*(function () {
+(function () {
     
     var noTemplate;
     setup.push(function () {
@@ -98,4 +96,4 @@
     };
     
     return route;
-}());*/
+}());
