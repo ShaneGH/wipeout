@@ -1,0 +1,56 @@
+Convert string to regex: "$string".replace(/(?=[-\/\\^$*+?.()|[\]{}])/g, '\\')
+
+TODO:       ~ in route where there is no parent defaults to settings.appRootUrl
+            Partial path match (if url is /something/7/somethingelse, then path /something/{id}/ should match)
+			Query string ordering shouldn't matter
+			ignore case (see regex above)
+			If url is /something/ and route is /something/{id} should not match
+			data types in route
+
+
+
+Additions:
+
+
+    $router.prototype.addRoute = function (route, callback, options) {
+        // options: exactMatch, unRoutedCallback, executeImmediately, context
+        
+        if (!route || !callback)
+            return;
+
+        var args = wipeout.utils.jsParse.getArgumentNames(callback);
+        callback = callback.bind(options && options.context);
+        
+        this.routes = this.routes || {};
+        
+        var routeKey = route + (!!(options && options.exactMatch));
+        
+        if (!this.routes[routeKey]) {
+            this.routes[routeKey] = new wipeout.di.utils.routing.route(route, options && options.exactMatch);
+            this.routes[routeKey].callbacks = [callback];
+        } else {
+            this.routes[routeKey].callbacks.push(callback);
+        }
+
+        callback.args = args;
+        callback.invokeIfValid = invokeIfValid;
+        callback.unRoutedCallback = options && options.unRoutedCallback;
+        
+        if (options && options.executeImmediately) {
+            var vals = this.routes[routeKey].parse(this.$location);
+            callback.invokeIfValid(vals);
+        }
+        
+        return {
+            dispose: (function () {
+                if (!route)
+                    return;
+                
+                if (this.routes && this.routes[routeKey])
+                    while ((route = this.routes[routeKey].callbacks.indexOf(callback)) !== -1)
+                        this.routes[routeKey].callbacks.splice(route, 1);
+                
+                route = null;
+            }).bind(this)
+        };
+    };

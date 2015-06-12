@@ -144,3 +144,52 @@ testUtils.testWithUtils("extend", "", true, function(methods, classes, subject, 
     strictEqual(out, obj1);
     strictEqual(out.aaa, obj2.aaa);
 });
+
+testUtils.testWithUtils("asRegExp.convert", "", true, function(methods, classes, subject, invoker) {
+    // arrange
+    strictEqual(wipeout.utils.obj.asRegExp.convert("-/\\^$*+?.()|[]{}"), "\\-\\/\\\\\\^\\$\\*\\+\\?\\.\\(\\)\\|\\[\\]\\{\\}");
+});
+
+testUtils.testWithUtils("asRegExp", "", true, function(methods, classes, subject, invoker) {
+    // arrange
+    strictEqual(wipeout.utils.obj.asRegExp("-/\\^$*+?.()|[]{}").toString(), "/\\-\\/\\\\\\^\\$\\*\\+\\?\\.\\(\\)\\|\\[\\]\\{\\}/");
+});
+
+testUtils.testWithUtils("g", "", true, function(methods, classes, subject, invoker) {
+    // arrange
+    strictEqual(wipeout.utils.obj.asRegExp.g("-/\\^$*+?.()|[]{}").toString(), "/\\-\\/\\\\\\^\\$\\*\\+\\?\\.\\(\\)\\|\\[\\]\\{\\}/g");
+});
+
+testUtils.testWithUtils("i", "", true, function(methods, classes, subject, invoker) {
+    // arrange
+    strictEqual(wipeout.utils.obj.asRegExp.i("-/\\^$*+?.()|[]{}").toString(), "/\\-\\/\\\\\\^\\$\\*\\+\\?\\.\\(\\)\\|\\[\\]\\{\\}/i");
+});
+
+testUtils.testWithUtils("ig", "", true, function(methods, classes, subject, invoker) {
+    // arrange
+    strictEqual(wipeout.utils.obj.asRegExp.ig("-/\\^$*+?.()|[]{}").toString(), "/\\-\\/\\\\\\^\\$\\*\\+\\?\\.\\(\\)\\|\\[\\]\\{\\}/gi");
+});
+
+
+    function a () {
+    function asRegExp (inputString) {
+        return new RegExp(asRegExp.convert(inputString));
+    }
+    
+    var regexpReplace = /(?=[-\/\\^$*+?.()|[\]{}])/g;
+    asRegExp.convert = function (inputString) {
+        return inputString.replace(regexpReplace, "\\");
+    }
+    
+    asRegExp.g = function (inputString) {
+        return new RegExp(asRegExp.convert(inputString), "g");
+    }
+    
+    asRegExp.ig = function (inputString) {
+        return new RegExp(asRegExp.convert(inputString), "g", "i");
+    }
+    
+    asRegExp.i = function (inputString) {
+        return new RegExp(asRegExp.convert(inputString), "i");
+    }
+    }

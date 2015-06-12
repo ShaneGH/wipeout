@@ -280,6 +280,27 @@ Class("wipeout.utils.obj", function () {
         return extend;
     };
     
+    function asRegExp (inputString) {
+        return new RegExp(asRegExp.convert(inputString));
+    }
+    
+    var regexpReplace = /(?=[-\/\\^$*+?.()|[\]{}])/g;
+    asRegExp.convert = function (inputString) {
+        return inputString.replace(regexpReplace, "\\");
+    }
+    
+    asRegExp.g = function (inputString) {
+        return new RegExp(asRegExp.convert(inputString), "g");
+    }
+    
+    asRegExp.ig = function (inputString) {
+        return new RegExp(asRegExp.convert(inputString), "gi");
+    }
+    
+    asRegExp.i = function (inputString) {
+        return new RegExp(asRegExp.convert(inputString), "i");
+    }
+    
     var obj = function obj() { };
     obj.extend = extend;
     obj.camelCase = camelCase;
@@ -295,5 +316,6 @@ Class("wipeout.utils.obj", function () {
     obj.joinPropertyName = joinPropertyName;
     obj.copyArray = copyArray;
     obj.random = random;
+    obj.asRegExp = asRegExp;
     return obj;
 });
