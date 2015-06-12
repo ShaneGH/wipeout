@@ -8,33 +8,35 @@ Class("wipeout.di.utils.routing.routePart", function () {
         this.parts = [];
         this.variables = {};
         
+        // determine if route is exact match
         var exactMatch = !exact.test(route);
         if (!exactMatch)
             route = route.replace(exact, "");
         
-        var r = route, tmp, staticPart, variableName, compulsary;
+        // add static values and variables
+        var r = route, tmp, staticPart, variable;
+        
+        // find first variable
         while (tmp = begin.exec(route)) {
+            // add static part
             staticPart = route.substr(0, tmp.index);
             this.parts.push(wipeout.utils.obj.asRegExp.i(staticPart));
 
+            // get variable name
             if (!(tmp = end.exec(route)))
                 throw "Invalid route part: \"" + r + "\". Missing closing brace \"}\"";
+            variable = routePart.prepareVariable(route.substring(staticPart.length + 1, tmp.index));
+            
+            if (this.variables[variable.name])
+                throw "Invalid route part: \"" + r + "\". Variable \"" + variable.name + "\" defined more than once.";
 
-            variableName = route.substring(staticPart.length + 1, tmp.index);
-            if (variableName[0] === "*") {
-                variableName = variableName.substr(1);
-                compulsary = false;
-            } else {
-                compulsary = true;
-            }
+            // add variable metadata
+            this.variables[variable.name] = variable;
             
-            if (this.variables[variableName])
-                throw "Invalid route part: \"" + r + "\". Variable \"" + variableName + "\" defined more than once.";
+            // add variable name
+            this.parts.push(variable.name);
             
-            //TODO: parser flags
-                
-            this.variables[variableName] = compulsary;
-            this.parts.push(variableName);
+            // prepare route for next loop
             route = route.substr(tmp.index + 1);
         }
         
@@ -44,6 +46,30 @@ Class("wipeout.di.utils.routing.routePart", function () {
         if (exactMatch)
             this.parts.push(/$/);
     });
+    
+    var compulsary = /^\*/;
+    routePart.prepareVariable = function (variableName) {
+
+        variableName = wipeout.template.rendering.compiledTemplate.getPropertyFlags(variableName);
+        var output = {
+            compulsary: !compulsary.test(variableName.name),
+            name: variableName.name,
+            parser: wipeout.template.initialization.parsers.string
+        };
+        
+        // determine whether variable is compulsary
+        if (!output.compulsary)
+            output.name = output.name.replace(compulsary, "");
+        
+        // try to get custom parser
+        for (var i = 0, ii = variableName.flags.length; i < ii; i++)
+            if (wipeout.template.initialization.parsers[variableName.flags[i]]) {
+                output.parser = wipeout.template.initialization.parsers[variableName.flags[i]];
+                break;
+            }
+        
+        return output;
+    };
     
     routePart.prototype.parse = function (uriPart, values) {
 		///<summary>Parse a string into values based on the route</summary>
@@ -85,13 +111,13 @@ Class("wipeout.di.utils.routing.routePart", function () {
         
         values = values || {};
         for (var i in this.variables) { //TEST
-            if (this.variables[i]) {
+            if (this.variables[i].compulsary) {
                 if (!routedVariables.hasOwnProperty(i) || routedVariables[i] === "")
                     return null;
                 
-                values[i] = routedVariables[i]; //TODO: parse
+                values[i] = this.variables[i].parser(routedVariables[i]);
             } else {
-                values[i] = routedVariables[i] === "" ? null : routedVariables[i];  //TODO: parse
+                values[i] = routedVariables[i] === "" ? null : this.variables[i].parser(routedVariables[i]);
             }
         }
 
