@@ -8,8 +8,10 @@ Class("wipeout.di.utils.routing.routePart", function () {
         this.parts = [];
         this.variables = {};
         
+        //TODO: * at beginning of route
+        
         // determine if route is exact match
-        var exactMatch = !exact.test(route);
+        var exactMatch = !exact.test(route);    //TODM
         if (!exactMatch)
             route = route.replace(exact, "");
         
@@ -52,9 +54,9 @@ Class("wipeout.di.utils.routing.routePart", function () {
 
         variableName = wipeout.template.rendering.compiledTemplate.getPropertyFlags(variableName);
         var output = {
-            compulsary: !compulsary.test(variableName.name),
+            compulsary: !compulsary.test(variableName.name),    //TODM
             name: variableName.name,
-            parser: wipeout.template.initialization.parsers.string
+            parser: wipeout.template.initialization.parsers.string  //TODM
         };
         
         // determine whether variable is compulsary
@@ -115,9 +117,9 @@ Class("wipeout.di.utils.routing.routePart", function () {
                 if (!routedVariables.hasOwnProperty(i) || routedVariables[i] === "")
                     return null;
                 
-                values[i] = this.variables[i].parser(routedVariables[i]);
+                values[i] = this.variables[i].parser(decodeURIComponent(routedVariables[i]));
             } else {
-                values[i] = routedVariables[i] === "" ? null : this.variables[i].parser(routedVariables[i]);
+                values[i] = routedVariables[i] === "" ? null : this.variables[i].parser(decodeURIComponent(routedVariables[i]));
             }
         }
 

@@ -101,7 +101,7 @@ Class("wipeout.di.services.$router", function () {
         
         var args = [];
         for (var i = 0, ii = this.args.length; i < ii; i++) {
-            if (this.args[i] === "$allValues") {
+            if (this.args[i] === "$allValues") {    //TODM
                 args.push(vals);
             } else if (!vals.hasOwnProperty(this.args[i])) {
                 if (this.hasControl && this.unRoutedCallback)

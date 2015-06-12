@@ -86,16 +86,16 @@ testUtils.testWithUtils("test 2", "with regexp special characters", true, functi
     ok(!route.parse("YYY^!"));
 });
 
-testUtils.testWithUtils("test 3", null, true, function(methods, classes, subject, invoker) {
+testUtils.testWithUtils("test 3, with url encoded chars", null, true, function(methods, classes, subject, invoker) {
     // arrange
     var route = new wipeout.di.utils.routing.routePart("x{val}");
     
     // act
     // assert
-    strictEqual(route.parse("xYYY").val, "YYY");
-    ok(!route.parse("YYY"));
-    ok(!route.parse("zxYYY"));
-    strictEqual(route.parse("xYYYz").val, "YYYz");
+    strictEqual(route.parse("xYY%20Y").val, "YY Y");
+    ok(!route.parse("YY%20Y"));
+    ok(!route.parse("zxYY%20Y"));
+    strictEqual(route.parse("xYY%20Yz").val, "YY Yz");
 });
 
 testUtils.testWithUtils("test 4", null, true, function(methods, classes, subject, invoker) {

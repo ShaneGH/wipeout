@@ -5,6 +5,21 @@ module("wipeout.di.utils.routing.route", {
     }
 });
 
+testUtils.testWithUtils("compileSearchValues", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    // act
+    var op = invoker({search: "?val1=val2&val%203=val%204&val5=&&val6&val7=val8"});
+    
+    // assert
+    strictEqual(op["val1"], "val2");
+    strictEqual(op["val 3"], "val 4");
+    strictEqual(op["val5"], "");
+    ok(op.hasOwnProperty("val6"));
+    strictEqual(op["val6"], undefined);
+    strictEqual(op["val7"], "val8");
+
+});
+
 testUtils.testWithUtils("constructor", null, true, function(methods, classes, subject, invoker) {
     // arrange
     var uri, rs = {}, parts = {x: {}, uri: uri = {}};

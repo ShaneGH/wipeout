@@ -47,7 +47,24 @@ Class("wipeout.di.utils.routing.route", function () {
             (this.parts.search ? location.search : "") +
             (this.parts.hash ? location.hash : "");
         
+        if (values.$searchString)
+            throw "Invalid route variable name \"$searchString\". This term is reserved.";
+        values.$searchString = route.compileSearchValues(location); //TODM
+        
         return values;
+    };
+        
+    route.compileSearchValues = function (location) {
+        var output = {};
+        enumerateArr((location.search || "").replace(/^\?/, "").split("&"), function (search) {
+            search = search.split("=");
+            if (search.length === 2)
+                output[decodeURIComponent(search[0])] = decodeURIComponent(search[1]);
+            else if (search[0])
+                output[decodeURIComponent(search[0])] = undefined;
+        });
+        
+        return output;
     };
     
     //http://tools.ietf.org/html/rfc3986#section-3.1 (+ js variable names)
