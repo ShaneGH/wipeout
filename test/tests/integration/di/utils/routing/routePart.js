@@ -166,7 +166,22 @@ testUtils.testWithUtils("Compulsary and Non compulsary value", null, true, funct
     strictEqual(route.parse("//xxx/"), null);
 });
 
-testUtils.testWithUtils("Exact and non exact match", null, true, function(methods, classes, subject, invoker) {
+testUtils.testWithUtils("Exact and non exact match (beginning)", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    var route1 = new wipeout.di.utils.routing.routePart("xyxyxy");
+    var route2 = new wipeout.di.utils.routing.routePart("*xyxyxy");
+    var route3 = new wipeout.di.utils.routing.routePart("");
+    var route4 = new wipeout.di.utils.routing.routePart("*");
+    
+    // act
+    // assert
+    ok(!route1.parse("zxyxyxy"));
+    ok(route2.parse("zxyxyxy"));
+    ok(!route3.parse("zxyxyxy"));
+    ok(route4.parse("zxyxyxy"));
+});
+
+testUtils.testWithUtils("Exact and non exact match (end)", null, true, function(methods, classes, subject, invoker) {
     // arrange
     var route1 = new wipeout.di.utils.routing.routePart("xyxyxy");
     var route2 = new wipeout.di.utils.routing.routePart("xyxyxy*");
@@ -179,4 +194,19 @@ testUtils.testWithUtils("Exact and non exact match", null, true, function(method
     ok(route2.parse("xyxyxyz"));
     ok(!route3.parse("xyxyxyz"));
     ok(route4.parse("xyxyxyz"));
+});
+
+testUtils.testWithUtils("Exact and non exact match (beginning and end)", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    var route1 = new wipeout.di.utils.routing.routePart("xyxyxy");
+    var route2 = new wipeout.di.utils.routing.routePart("*xyxyxy*");
+    var route3 = new wipeout.di.utils.routing.routePart("");
+    var route4 = new wipeout.di.utils.routing.routePart("**");
+    
+    // act
+    // assert
+    ok(!route1.parse("zxyxyxyz"));
+    ok(route2.parse("zxyxyxyz"));
+    ok(!route3.parse("zxyxyxyz"));
+    ok(route4.parse("zxyxyxyz"));
 });

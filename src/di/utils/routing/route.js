@@ -39,7 +39,6 @@ Class("wipeout.di.utils.routing.route", function () {
             if (!this.parts[part].parse(location[part], values))
                 return null;
         
-        //TODO: difference between host and hostname
         values.routedUrl = (this.parts.protocol ? (location.protocol + "//") : "") +
             (this.parts.hostname ? location.hostname : "") +
             (this.parts.port ? (":" + location.port) : "") +
@@ -98,6 +97,18 @@ Class("wipeout.di.utils.routing.route", function () {
         // pathname
         if ((tmp = /[\?#]|$/.exec(route)) && tmp.index > 0) {
             output.pathname = route.substring(0, tmp.index);
+            if (output.pathname[0] === "~" && !output.protocol && !output.hostname && !output.port) {
+                var leadingSlash = wipeout.settings.applicationRootUrl && wipeout.settings.applicationRootUrl[0] !== "/" ? "/" : "";
+                var trailingSlash = wipeout.settings.applicationRootUrl && 
+                    wipeout.settings.applicationRootUrl[wipeout.settings.applicationRootUrl.length - 1] !== "/"
+                    && output.pathname[1] !== "/" ? "/" : "";
+                
+                output.pathname = leadingSlash +
+                    wipeout.settings.applicationRootUrl + 
+                    trailingSlash +
+                    output.pathname.substr(1);
+            }
+            
             route = route.replace(output.pathname, "");
         }
         

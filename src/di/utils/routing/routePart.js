@@ -1,19 +1,28 @@
 Class("wipeout.di.utils.routing.routePart", function () {
     
-    var begin = /\{/, end = /\}/, exact = /\*$/;
+    var begin = /\{/, end = /\}/, invalidExactBeginning = /^\*\{/, exactBeginning = /^\*/, exactEnding = /\*$/;
     var routePart = orienteer.extend(function routePart (route) {
 		///<summary>Define a section of a route</summary>
         ///<param name="route" type="String">The route section</param>
         
+        // * will only match the beginning, ** will passthrough everything
+        if (route === "*")
+            route = "**";
+        
         this.parts = [];
         this.variables = {};
         
-        //TODO: * at beginning of route
+        if (invalidExactBeginning.test(route))
+            throw "The route \"" + route + "\" is invalid. You cannot begin a route with a wildcard followed by a route variable as all wildcard characters will be compiled into the route variable";
+        
+        var startExact = !exactBeginning.test(route);
+        if (!startExact)
+            route = route.replace(exactBeginning, "");
         
         // determine if route is exact match
-        var exactMatch = !exact.test(route);    //TODM
-        if (!exactMatch)
-            route = route.replace(exact, "");
+        var endExact = !exactEnding.test(route);    //TODM
+        if (!endExact)
+            route = route.replace(exactEnding, "");
         
         // add static values and variables
         var r = route, tmp, staticPart, variable;
@@ -22,7 +31,12 @@ Class("wipeout.di.utils.routing.routePart", function () {
         while (tmp = begin.exec(route)) {
             // add static part
             staticPart = route.substr(0, tmp.index);
-            this.parts.push(wipeout.utils.obj.asRegExp.i(staticPart));
+            if (!startExact) {
+                this.parts.push(new RegExp(".*" + wipeout.utils.obj.asRegExp.convert(staticPart), "i"));
+                startExact = true;
+            } else {
+                this.parts.push(wipeout.utils.obj.asRegExp.i(staticPart));
+            }
 
             // get variable name
             if (!(tmp = end.exec(route)))
@@ -42,10 +56,15 @@ Class("wipeout.di.utils.routing.routePart", function () {
             route = route.substr(tmp.index + 1);
         }
         
-        if (route.length)
-            this.parts.push(wipeout.utils.obj.asRegExp.i(route));
+        if (route.length) {
+            if (!startExact) {
+                this.parts.push(new RegExp(".*" + wipeout.utils.obj.asRegExp.convert(route), "i"));
+            } else {
+                this.parts.push(wipeout.utils.obj.asRegExp.i(route));
+            }
+        }
         
-        if (exactMatch)
+        if (endExact)
             this.parts.push(/$/);
     });
     

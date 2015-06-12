@@ -15,6 +15,9 @@ Class("wipeout.settings", function() {
     }
     
     //TODM
+    settings.applicationRootUrl = "";
+    
+    //TODM
     settings.scanDom = true;
 
     settings.asynchronousTemplates = true;

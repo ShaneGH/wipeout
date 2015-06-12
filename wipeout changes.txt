@@ -2,7 +2,7 @@ Convert string to regex: "$string".replace(/(?=[-\/\\^$*+?.()|[\]{}])/g, '\\')
 
 TODO:       ~ in route where there is no parent defaults to settings.appRootUrl
             X-Partial path match (if url is /something/7/somethingelse, then path /something/{id}/ should match)
-			Query string ordering shouldn't matter
+			X-Query string ordering shouldn't matter
 			X-ignore case (see regex above)
 			X-If url is /something/ and route is /something/{id} should not match
 			X-data types in route
