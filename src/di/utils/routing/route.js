@@ -66,68 +66,74 @@ Class("wipeout.di.utils.routing.route", function () {
         return output;
     };
     
-    //http://tools.ietf.org/html/rfc3986#section-3.1 (+ js variable names)
+    //http://tools.ietf.org/html/rfc3986#section-3.1 + js variable names (\w\$\{\})
     var protocol = /^[a-zA-Z\{]([\w\$\+\-\.\{\}])*:/;
     
-    route.splitRoute = function (route) {
+    route.splitRoute = function (routeString) {
 		///<summary>Split a route into parts: protocol, host, path etc...</summary>
-        ///<param name="route" type="String">The route string</param>
+        ///<param name="routeString" type="String">The route string</param>
         ///<returns type="Object">A dictionary of parts</returns>
         
-        var tmp, output = {uri: route};
+        var tmp, output = {uri: routeString};
         
         // protocol
-        if (tmp = protocol.exec(route)) {
+        if (tmp = protocol.exec(routeString)) {
             output.protocol = tmp[0];
-            route = route.replace(protocol, "").replace(/^((~?)\/)+/, "");
+            routeString = routeString.replace(protocol, "").replace(/^\/+/, "");
         }
         
         // host
-        if ((tmp = /:|((~?)\/)|\?|#|$/.exec(route)) && tmp.index > 0) {
-            output.hostname = route.substring(0, tmp.index);
-            route = route.replace(output.hostname, "");
+        if ((tmp = /:|((~?)\/)|\?|#|$/.exec(routeString)) && tmp.index > 0) {
+            output.hostname = routeString.substring(0, tmp.index);
+            routeString = routeString.replace(output.hostname, "");
         }
         
         // port
-        if (output.hostname && route[0] === ":" && (tmp = /((~?)\/)|\?|#|$/.exec(route)) && tmp.index > 0) {
-            output.port = route.substring(1, tmp.index);
-            route = route.replace(":" + output.port, "");
+        if (output.hostname && routeString[0] === ":" && (tmp = /((~?)\/)|\?|#|$/.exec(routeString)) && tmp.index > 0) {
+            output.port = routeString.substring(1, tmp.index);
+            routeString = routeString.replace(":" + output.port, "");
         }
         
         // pathname
-        if ((tmp = /\?|#|$/.exec(route)) && tmp.index > 0) {
-            output.pathname = route.substring(0, tmp.index);
-            route = route.replace(output.pathname, "");
+        if ((tmp = /\?|#|$/.exec(routeString)) && tmp.index > 0) {
+            output.pathname = routeString.substring(0, tmp.index);
+            routeString = routeString.replace(output.pathname, "");
             
-            if (output.pathname[0] === "~" && !output.protocol && !output.hostname && !output.port) {
-                var leadingSlash = wipeout.settings.applicationRootUrl && wipeout.settings.applicationRootUrl[0] !== "/" ? "/" : "";
-                var trailingSlash = wipeout.settings.applicationRootUrl && 
-                    wipeout.settings.applicationRootUrl[wipeout.settings.applicationRootUrl.length - 1] !== "/"
-                    && output.pathname[1] !== "/" ? "/" : "";
-                
-                output.pathname = leadingSlash +
-                    wipeout.settings.applicationRootUrl + 
-                    trailingSlash +
-                    output.pathname.substr(1);
-            }
+            if (!output.protocol && !output.hostname && !output.port)
+                output.pathname = route.fixPathName(output.pathname, wipeout.settings.applicationRootUrl);
         }
         
         // search
-        if (route[0] === "?") {
-            if ((tmp = /[#]|$/.exec(route)) && tmp.index > 0) {
-                output.search = route.substring(0, tmp.index);
-                route = route.replace(output.search, "");
+        if (routeString[0] === "?") {
+            if ((tmp = /#|$/.exec(routeString)) && tmp.index > 0) {
+                output.search = routeString.substring(0, tmp.index);
+                routeString = routeString.replace(output.search, "");
             }
         }
         
         // hash
-        if (route[0] === "#") {
-            output.hash = route;
-        } else if (route.length) {
+        if (routeString[0] === "#") {
+            output.hash = routeString;
+        } else if (routeString.length) {
             throw "Invalid url: \"" + output.uri + "\".";
         }
         
         return output;
+    };
+    
+    route.fixPathName = function (pathName, rootPath) {
+        if (pathName[0] !== "~")
+            return pathName;
+        
+        var leadingSlash = rootPath && rootPath[0] !== "/" ? "/" : "";
+        var trailingSlash = rootPath && 
+            rootPath[rootPath - 1] !== "/"
+            && pathName[1] !== "/" ? "/" : "";
+
+        return leadingSlash +
+            rootPath + 
+            trailingSlash +
+            pathName.substr(1);
     };
     
     return route;
