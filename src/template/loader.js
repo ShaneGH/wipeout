@@ -15,13 +15,16 @@ Class("wipeout.template.loader", function () {
             type: "GET",
             url: templateName,
             success: (function(result) {
-                this._success = true;
-                var callbacks = this._callbacks;
-                delete this._callbacks;
-				
-				this.templateValue = result.responseText;
-                for(var i = 0, ii = callbacks.length; i < ii; i++)
-                    callbacks[i](this.templateValue);
+                
+                new wipeout.template.templateModuleLoader(result.responseText, (function (template) {
+                    this._success = true;
+                    var callbacks = this._callbacks;
+                    delete this._callbacks;
+
+                    this.templateValue = template;
+                    for(var i = 0, ii = callbacks.length; i < ii; i++)
+                        callbacks[i](this.templateValue);
+                }).bind(this)).load();
             }).bind(this),
             error: (function() {
                 delete this._callbacks;

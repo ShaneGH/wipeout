@@ -22,7 +22,14 @@ test("success", function() {
 			start();
         });
     }, 1);
-	
+    
+    classes.mock("wipeout.template.templateModuleLoader", function (input1, input2) {
+        strictEqual(input1, template);
+        input2(template);
+        
+        this.load = methods.method([]);
+    }, 1);
+    
 	// act
 	// assert
 	var subject = new wipeout.template.loader(name);
