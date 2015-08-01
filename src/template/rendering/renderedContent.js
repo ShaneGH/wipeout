@@ -169,8 +169,7 @@ Class("wipeout.template.rendering.renderedContent", function () {
     renderedContent.prototype.template = function(templateId) {
         ///<summary>Render the view model with the given template</summary>
         ///<param name="templateId" type="String">A pointer to the template to apply</param>
-        		
-		console.log(templateId);
+        
         // if a previous request is pending, cancel it
         if (this.asynchronous)
             this.asynchronous.cancel();
