@@ -16,14 +16,14 @@ Class("wipeout.template.templateModuleLoader", function () {
         // find blank lines or lines beginning with ~. ~ can be escaped with ~~
         //TODM
         while (mod = /(^\s+)|(^\s*~(?!~).*)/.exec(template)) {
-            template = template.substr(mod[0].length + 1);
+            template = template.replace(mod[0], "");
             if (/^\s*$/.test(mod[0]))
                 continue;
             
             this.modules.push(mod[0].replace(/^\s*~\s*/, "").replace(/\s+$/, "").replace(/\./g, "/"));
         }
         
-        this.template = template;
+        this.template = template[0] === "~" && template[1] === "~" ? template.substr(1) : template;
     };
     
     templateModuleLoader.prototype.load = function() {
