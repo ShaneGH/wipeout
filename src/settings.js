@@ -20,6 +20,7 @@ Class("wipeout.settings", function() {
     //TODM
     settings.scanDom = true;
 
+    settings.defaultBindingType = "ow"; //TODM
     settings.asynchronousTemplates = true;
     settings.displayWarnings = true;
     settings.useElementClassName = false;
