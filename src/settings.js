@@ -14,6 +14,7 @@ Class("wipeout.settings", function() {
         });
     }
 
+    settings.defaultBindingType = "ow"; //TODM
     settings.asynchronousTemplates = true;
     settings.displayWarnings = true;
     settings.useElementClassName = false;

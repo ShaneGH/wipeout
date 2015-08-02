@@ -196,7 +196,7 @@ Class("wipeout.template.initialization.compiledInitializer", function () {
 		
 		return setter[wipeoutBindingType] || 
 				(viewModel instanceof wipeout.base.bindable && viewModel.getGlobalBindingType(setter.name)) || 
-				"ow";
+				wipeout.settings.defaultBindingType;
 	};
         
     return compiledInitializer;
