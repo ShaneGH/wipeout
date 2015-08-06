@@ -1,13 +1,16 @@
 Class("wipeout.template.templateModuleLoader", function () {
-	function templateModuleLoader(template, onComplete) {
+    
+    
+    var templateModuleLoader = wipeout.base.asyncLoaderBase.extend(function templateModuleLoader (template, onComplete) {
         ///<summary>Scans a template for required modules and loads them</summary>
         ///<param name="template" type="string" optional="false">The template</param>
         ///<param name="onComplete" type="Function" optional="true">A callback to invoke on complete</param>
+		
+        this._super();
         
-        this.callback = onComplete;
-        
+        this.add(onComplete);
         this.getModules(template);
-    }
+    });
     
     templateModuleLoader.prototype.getModules = function(template) {
         this.modules = [];
@@ -39,7 +42,7 @@ Class("wipeout.template.templateModuleLoader", function () {
         }
         
         if (!this.modules.length) {
-            if (this.callback) this.callback(this.tenplate);
+            if (this.callback) this.callback(this.template);
             return false;
         }
         
@@ -48,11 +51,11 @@ Class("wipeout.template.templateModuleLoader", function () {
         return true;
     };
     
-    templateModuleLoader.prototype.load = function () {
+    templateModuleLoader.prototype.loaded = function () {
         this.__loading--;
         
         if (this.__loading === 0 && this.callback) {
-            this.callback(this.template);
+            this.success(this.template);
         }
     };
     
@@ -72,7 +75,7 @@ Class("wipeout.template.templateModuleLoader", function () {
         node.addEventListener('load', this.loaded.bind(this), false);
         node.addEventListener('error', this.failed.bind(this), false);
         
-        node.src = "/" + url.replace(/\./g, "/") + ".js?" + new Date().getTime();  //TODO: getId part
+        node.src = wipeout.settings.convertModuleUrl(forModule);  //TODO: getId part
         document.body.appendChild(node);
     };
     

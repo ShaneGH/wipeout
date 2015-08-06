@@ -24,6 +24,17 @@ Class("wipeout.settings", function() {
     settings.asynchronousTemplates = true;
     settings.displayWarnings = true;
     settings.useElementClassName = false;
+    settings.asyncModuleRoot = "";
+    
+    //TODM
+    settings.convertTemplateToUrl = function (template) {
+        return template;
+    };
+    
+    //TODM
+    settings.convertModuleUrl = function (script) {
+        return "/" + forModule.replace(/\./g, "/") + ".js?" + new Date().getTime();  //TODO: getId part
+    };
     
     settings.bindingStrategies = {
         onlyBindObservables: 0,
