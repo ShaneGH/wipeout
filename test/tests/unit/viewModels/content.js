@@ -100,5 +100,5 @@ testUtils.testWithUtils("createAnonymousTemplate", "Using xml", true, function(m
     // assert
     strictEqual(result1, result2);
     strictEqual(wipeout.template.engine.instance.templates[result1].xml, val);
-    strictEqual(result1, val.WipeoutAnonymousTemplate);
+    strictEqual(result1, val["wipeout-anonymous-template"]);
 });

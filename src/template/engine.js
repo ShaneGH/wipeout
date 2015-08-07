@@ -38,20 +38,22 @@ Class("wipeout.template.engine", function () {
         ///<param name="callback" type="Function" optional="true">A callback which the compiled template will be passed to</param>
         ///<returns type="Boolean">True if synchronus, false if asynchronus</returns>
 		
+        if (!(typeof template === "string")) {
+            callback(this.setTemplate(templateId, template));
+            return;
+        }
+        
 		if (!templateId) throw "Invalid template id";
         
 		templateId = fixTemplateId(templateId);
         if (this.templates[templateId]) throw "Template " + templateId + " has already been defined.";
-        
-        if (template.nodeType === 2) template = template.value;
-        
+		
         this.templates[templateId] = new wipeout.template.templateModuleLoader(template, (function (template) {
-            template = wipeout.wml.wmlParser(template);
-            this.templates[templateId] = new wipeout.template.rendering.compiledTemplate(template);
+            template = this.setTemplate(templateId, template);
             if (callback)
-                callback(this.templates[templateId]);
+                callback(template);
         }).bind(this));
-        
+
         return this.templates[templateId].load();
     };
     
@@ -65,10 +67,12 @@ Class("wipeout.template.engine", function () {
         
 		templateId = fixTemplateId(templateId);
         if (this.templates[templateId]) throw "Template " + templateId + " has already been defined.";
+		
+        if (typeof template === "string")
+            template = wipeout.wml.wmlParser(template);
+		else if (template.nodeType === 2)
+            template = wipeout.wml.wmlParser(template.value);
         
-        if (template.nodeType === 2) template = template.value;
-        
-        template = wipeout.wml.wmlParser(template);
         return this.templates[templateId] = new wipeout.template.rendering.compiledTemplate(template);
     };
     

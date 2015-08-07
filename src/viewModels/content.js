@@ -28,7 +28,7 @@ Class("wipeout.viewModels.content", function () {
     content.createAnonymousTemplate = (function () {
         
         var i = Math.floor(Math.random() * 1000000000), 
-            anonymousTemplateId = "WipeoutAnonymousTemplate",
+            anonymousTemplateId = "wipeout-anonymous-template",
             templateStringCache = {};
         
         function newTemplateId () {
@@ -40,7 +40,7 @@ Class("wipeout.viewModels.content", function () {
             ///<param name="templateStringOrXml" type="String" optional="false">Gets a template id for an anonymous template</param>
             ///<param name="forceCreate" type="Boolean" optional="true">Default: false. If set to true, will not use a cached template.</param>
             ///<returns type="String">The template id</returns>
-
+            
             if (typeof templateStringOrXml === "string") {
 				// look in cached template strings and create template if necessary
                 if (forceCreate || !templateStringCache[templateStringOrXml]) {
