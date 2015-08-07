@@ -12,10 +12,7 @@ Class("wipeout.template.loader", function () {
             type: "GET",
             url: wipeout.settings.convertTemplateToUrl(templateName),
             success: function(result) {
-                
-                new wipeout.template.templateModuleLoader(result.responseText, function (template) {
-                    success(template);
-                }).load();
+                success(result.responseText);
             },
             error: function() {
                 throw "Could not locate template \"" + templateName + "\"";

@@ -45,7 +45,7 @@ Class("wipeout.viewModels.content", function () {
 				// look in cached template strings and create template if necessary
                 if (forceCreate || !templateStringCache[templateStringOrXml]) {
                     var id = newTemplateId();
-                    wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);  //SETTEMPLATEINSTANCE 1
+                    wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);
                     templateStringCache[templateStringOrXml] = id;
                 }
 
@@ -54,7 +54,7 @@ Class("wipeout.viewModels.content", function () {
 				// look for cached id within xml or create one
                 if (forceCreate || !templateStringOrXml[anonymousTemplateId]) {
                     var id = newTemplateId();
-                    wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);  //SETTEMPLATEINSTANCE 2
+                    wipeout.template.engine.instance.setTemplate(id, templateStringOrXml);
                     templateStringOrXml[anonymousTemplateId] = id;
                 }
 

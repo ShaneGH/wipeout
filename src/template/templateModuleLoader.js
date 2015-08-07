@@ -8,7 +8,7 @@ Class("wipeout.template.templateModuleLoader", function () {
 		
         this._super();
         
-        this.add(onComplete);
+        this.addCallback(onComplete);
         this.getModules(template);
     });
     
