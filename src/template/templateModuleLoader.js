@@ -1,14 +1,13 @@
 Class("wipeout.template.templateModuleLoader", function () {
     
     
-    var templateModuleLoader = wipeout.base.asyncLoaderBase.extend(function templateModuleLoader (template, onComplete) {
+    var templateModuleLoader = wipeout.base.asyncLoaderBase.extend(function templateModuleLoader (template) {
         ///<summary>Scans a template for required modules and loads them</summary>
         ///<param name="template" type="string" optional="false">The template</param>
         ///<param name="onComplete" type="Function" optional="true">A callback to invoke on complete</param>
 		
         this._super();
         
-        this.addCallback(onComplete);
         this.getModules(template);
     });
     
@@ -75,7 +74,7 @@ Class("wipeout.template.templateModuleLoader", function () {
         node.addEventListener('load', this.loaded.bind(this), false);
         node.addEventListener('error', this.failed.bind(this), false);
         
-        node.src = wipeout.settings.convertModuleUrl(forModule);  //TODO: getId part
+        node.src = wipeout.settings.convertModuleToUrl(forModule);  //TODO: getId part
         document.body.appendChild(node);
     };
     

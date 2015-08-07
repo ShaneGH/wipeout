@@ -32,7 +32,7 @@ Class("wipeout.settings", function() {
     };
     
     //TODM
-    settings.convertModuleUrl = function (script) {
+    settings.convertModuleToUrl = function (forModule) {
         return "/" + forModule.replace(/\./g, "/") + ".js?" + new Date().getTime();  //TODO: getId part
     };
     

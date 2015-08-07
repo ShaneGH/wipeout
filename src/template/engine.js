@@ -48,13 +48,14 @@ Class("wipeout.template.engine", function () {
 		templateId = fixTemplateId(templateId);
         if (this.templates[templateId]) throw "Template " + templateId + " has already been defined.";
 		
-        this.templates[templateId] = new wipeout.template.templateModuleLoader(template, (function (template) {
+        this.templates[templateId] = new wipeout.template.templateModuleLoader(template);
+
+        this.templates[templateId].load();
+        return this.templates[templateId].addCallback((function (template) {
             template = this.setTemplate(templateId, template);
             if (callback)
                 callback(template);
         }).bind(this));
-
-        return this.templates[templateId].load();
     };
     
     engine.prototype.setTemplate = function (templateId, template) {
@@ -114,9 +115,24 @@ Class("wipeout.template.engine", function () {
             } 
 
             // if an async process has not been kicked off yet
-            if (wipeout.settings.asynchronousTemplates) {                
+            if (wipeout.settings.asynchronousTemplates) {
+                var _this = this;
                 this.templates[templateId] = new wipeout.template.loader(templateId);
-                return this.compileTemplate(templateId, callback);
+                var cancel1 = this.templates[templateId].addCallback(function (template) {
+                    
+                    // setTemplateWithModules will need this property to be null
+                    this.templates[templateId] = null;
+                    _this.setTemplateWithModules(templateId, template, function () {
+                        cancel2 = _this.compileTemplate(templateId, callback);
+                    });
+                }), cancel2;
+                
+                cancel1.onCancel(function () {
+                    if (cancel2)
+                        cancel2.cancel();
+                });
+                
+                return cancel1;
             }
         }
         
