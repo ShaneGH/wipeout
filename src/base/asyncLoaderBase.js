@@ -33,6 +33,7 @@ Class("wipeout.base.asyncLoaderBase", function () {
             this._callbacks.push(success = success.bind(null)); // make unique function
         } else if (this.__successArgs) {
             success.apply(null, this.__successArgs);
+            return null;
         } else {
             throw "Async operation failed";
         }

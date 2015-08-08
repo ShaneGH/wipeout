@@ -33,7 +33,12 @@ Class("wipeout.settings", function() {
     
     //TODM
     settings.convertModuleToUrl = function (forModule) {
-        return "/" + forModule.replace(/\./g, "/") + ".js?" + new Date().getTime();  //TODO: getId part
+        return "/" + forModule.replace(/\./g, "/") + ".js";
+    };
+    
+    //TODM
+    settings.convertStyleToUrl = function (forStyle) {
+        return "/" + forStyle.replace(/\./g, "/") + ".css";
     };
     
     settings.bindingStrategies = {

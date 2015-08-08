@@ -43,18 +43,17 @@ Class("wipeout.template.engine", function () {
             return;
         }
         
-		if (!templateId) throw "Invalid template id";
+		if (isNullOrWhiteSpace(templateId)) throw "Invalid template id";
         
 		templateId = fixTemplateId(templateId);
         if (this.templates[templateId]) throw "Template " + templateId + " has already been defined.";
 		
         this.templates[templateId] = new wipeout.template.templateModuleLoader(template);
-
-        this.templates[templateId].load();
         return this.templates[templateId].addCallback((function (template) {
+            this.templates[templateId] = null;  //setTemplate will need this to be null
             template = this.setTemplate(templateId, template);
             if (callback)
-                callback(template);
+                callback(this.templates[templateId]);
         }).bind(this));
     };
     
@@ -64,7 +63,7 @@ Class("wipeout.template.engine", function () {
         ///<param name="template" type="String|wipeout.wml.wmlAttribute">The template</param>
         ///<returns type="wipeout.template.rendering.compiledTemplate">The template</returns>
 		
-		if (!templateId) throw "Invalid template id";
+		if (isNullOrWhiteSpace(templateId)) throw "Invalid template id";
         
 		templateId = fixTemplateId(templateId);
         if (this.templates[templateId]) throw "Template " + templateId + " has already been defined.";
@@ -88,7 +87,7 @@ Class("wipeout.template.engine", function () {
             callback(this.templates[templateId].xml);
         }).bind(this));
     };
-	
+    
     engine.prototype.compileTemplate = function (templateId, callback) {
 		///<summary>Load a template and pass the value to a callback. The load may be synchronus if the template exists or asynchronus if the template has to be loaded.</summary>
         ///<param name="templateId" type="String">The template id</param>
@@ -109,9 +108,8 @@ Class("wipeout.template.engine", function () {
             // if the template exists in the DOM but has not been loaded
             var script;      
             if (script = document.getElementById(templateId)) {
-                return this.setTemplateWithModules(templateId, trimToLower(script.tagName) === "script" ? script.text : script.innerHTML, (function () {
-                    this.compileTemplate(templateId, callback);
-                }).bind(callback));
+                return this.setTemplateWithModules(
+                    templateId, trimToLower(script.tagName) === "script" ? script.text : script.innerHTML, callback);
             } 
 
             // if an async process has not been kicked off yet
@@ -121,16 +119,16 @@ Class("wipeout.template.engine", function () {
                 var cancel1 = this.templates[templateId].addCallback(function (template) {
                     
                     // setTemplateWithModules will need this property to be null
-                    this.templates[templateId] = null;
-                    _this.setTemplateWithModules(templateId, template, function () {
-                        cancel2 = _this.compileTemplate(templateId, callback);
-                    });
+                    _this.templates[templateId] = null;
+                    cancel2 = _this.setTemplateWithModules(templateId, template, callback);
                 }), cancel2;
                 
-                cancel1.onCancel(function () {
-                    if (cancel2)
-                        cancel2.cancel();
-                });
+                if (cancel1) {
+                    cancel1.onCancel(function () {
+                        if (cancel2)
+                            cancel2.cancel();
+                    });
+                }
                 
                 return cancel1;
             }
@@ -138,10 +136,19 @@ Class("wipeout.template.engine", function () {
         
         // if the template is in the middle of an async load
         if (this.templates[templateId] instanceof wipeout.base.asyncLoaderBase) {
-            return this.templates[templateId].addCallback((function () {
-                // when operation completes, re-add the callback to try again
-                this.compileTemplate(templateId, callback);
-            }).bind(this));
+            var _this = this;
+            var cancel = this.templates[templateId].addCallback(function () {
+                setTimeout(function () {
+                    // when operation completes, re-add the callback to try again
+                    var c = _this.compileTemplate(templateId, callback);
+                    if (cancel && c)
+                        cancel.onCancel(function () {
+                            c.cancel();
+                        });
+                });
+            });
+            
+            return cancel;
         } 
         
         // otherwise, bad template

@@ -14,7 +14,7 @@ Class("wipeout.utils.html", function () {
     function html() {
     };
     
-    html.createTemplatePlaceholder = createTemplatePlaceholder;
+    html.createTemplatePlaceholder = createTemplatePlaceholder; //TODM
     
     return html;    
 });

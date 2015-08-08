@@ -170,26 +170,13 @@ testUtils.testWithUtils("ig", "", true, function(methods, classes, subject, invo
     strictEqual(wipeout.utils.obj.asRegExp.ig("-/\\^$*+?.()|[]{}").toString(), "/\\-\\/\\\\\\^\\$\\*\\+\\?\\.\\(\\)\\|\\[\\]\\{\\}/gi");
 });
 
-
-    function a () {
-    function asRegExp (inputString) {
-        return new RegExp(asRegExp.convert(inputString));
-    }
-    
-    var regexpReplace = /(?=[-\/\\^$*+?.()|[\]{}])/g;
-    asRegExp.convert = function (inputString) {
-        return inputString.replace(regexpReplace, "\\");
-    }
-    
-    asRegExp.g = function (inputString) {
-        return new RegExp(asRegExp.convert(inputString), "g");
-    }
-    
-    asRegExp.ig = function (inputString) {
-        return new RegExp(asRegExp.convert(inputString), "g", "i");
-    }
-    
-    asRegExp.i = function (inputString) {
-        return new RegExp(asRegExp.convert(inputString), "i");
-    }
-    }
+testUtils.testWithUtils("isNullOrWhiteSpace", "", true, function(methods, classes, subject, invoker) {
+    // arrange    
+    // act    
+    // assert    
+    ok(invoker());
+    ok(invoker(""));
+    ok(invoker("      "));
+    ok(invoker("\n\t\n "));
+    ok(!invoker(" a"));
+});

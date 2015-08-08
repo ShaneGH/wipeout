@@ -183,6 +183,10 @@ var splitPropertyName = (function () {
 	};
 }());
 
+function isNullOrWhiteSpace (string) {
+    return !string || /^\s*$/.test(string);
+}
+
 Class("wipeout.utils.obj", function () {
             
     var joinPropertyName = function (propertyName) {
@@ -317,5 +321,6 @@ Class("wipeout.utils.obj", function () {
     obj.copyArray = copyArray;
     obj.random = random;
     obj.asRegExp = asRegExp;
+    obj.isNullOrWhiteSpace = isNullOrWhiteSpace;
     return obj;
 });
