@@ -24,7 +24,7 @@ Class("wipeout.template.templateModuleLoader", function () {
             if (/^\s*$/.test(mod[0]))
                 continue;
             
-            var m = mod[0].replace(/^\s*~\s*(module\s*:\s*)?/i, "").replace(/\s+$/, "").replace(/\./g, "/");
+            var m = mod[0].replace(/^\s*~\s*(module\s*:\s*)?/i, "").replace(/\s+$/, "");
             if (/^style:/i.test(m)) {
                 this.styles.push(m.replace(/^style:\s*/i, ""));
             } else {
@@ -44,24 +44,24 @@ Class("wipeout.template.templateModuleLoader", function () {
         var styles = [], modules = [], mod;
         
         // add modules which are not already present
-        for (var i = 0, ii = this.modules.length; i > ii; i++) {
+        for (var i = 0, ii = this.modules.length; i < ii; i++) {
             mod = {
                 module: this.modules[i],
                 url: wipeout.settings.convertModuleToUrl(this.modules[i])
             };
             
-            if (!this.moduleExists(mod))
+            if (!templateModuleLoader.moduleExists(mod))
                 modules.push(mod);
         }
         
         // add styles which are not already present
-        for (var i = 0, ii = this.styles.length; i > ii; i++) {
+        for (var i = 0, ii = this.styles.length; i < ii; i++) {
             mod = {
                 style: this.styles[i],
                 url: wipeout.settings.convertStyleToUrl(this.styles[i])
             };
             
-            if (!this.styleExists(mod))
+            if (!templateModuleLoader.styleExists(mod))
                 styles.push(mod);
         }
         

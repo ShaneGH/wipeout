@@ -269,6 +269,7 @@ function viewModel (name, extend, doNotWarn) {
             return this.value("$bindingStrategy", wipeout.settings.bindingStrategies.createObservables);
         },
 
+        //TODM: templateId is named incorrectly in the docs
 		// lifecycle functions
 		templateId: function (templateId, eagerLoad) {
 			///<summary>Add a default template id</summary>

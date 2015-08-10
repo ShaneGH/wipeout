@@ -115,7 +115,7 @@ Class("wipeout.template.engine", function () {
             // if an async process has not been kicked off yet
             if (wipeout.settings.asynchronousTemplates) {
                 var _this = this;
-                this.templates[templateId] = new wipeout.template.loader(templateId);
+                var loader = this.templates[templateId] = new wipeout.template.loader(templateId);
                 var cancel1 = this.templates[templateId].addCallback(function (template) {
                     
                     // setTemplateWithModules will need this property to be null
@@ -125,6 +125,9 @@ Class("wipeout.template.engine", function () {
                 
                 if (cancel1) {
                     cancel1.onCancel(function () {
+                        if (_this.templates[templateId] === loader)
+                            _this.templates[templateId] = null;
+                        
                         if (cancel2)
                             cancel2.cancel();
                     });
