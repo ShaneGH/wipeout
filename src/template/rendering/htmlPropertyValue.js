@@ -33,8 +33,9 @@ Class("wipeout.template.rendering.htmlPropertyValue", function () {
 		
 		var element = this.propertyOwner, rc = this.renderContext;
 		callback = callback || (function (e) {
-			e.preventDefault();
-			this.eventBuild().apply(null, rc.asEventArgs(e, element));
+			if (!this.eventBuild().apply(null, rc.asEventArgs(e, element))) {
+                e.preventDefault();
+            }
 		}).bind(this);
 						
         element.addEventListener(event, callback, capture || false);
