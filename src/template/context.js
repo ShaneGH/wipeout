@@ -130,9 +130,14 @@ Class("wipeout.template.context", function () {
 		
 		if (notFunctionCall.test(logic))
 			logic = logic.replace(notFunctionCall, "");
-		else if (!/\)[\s;]*$/.test(logic))
-			logic += "(e, element)";
-			
+		else {
+            if (!/\)[\s;]*$/.test(logic)) {
+			     logic += "(e, element)";
+            }
+            
+            logic = "return " + logic;
+        }
+        
 		try {
 			return new Function("$context", "$this", "$parent", "$parents", "$index", "e", "element", logic);
 		} catch (e) {
