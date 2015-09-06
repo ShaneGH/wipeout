@@ -43,7 +43,22 @@ testUtils.testWithUtils("routeUrl partial 1", null, true, function(methods, clas
     });
     
     // assert
-    strictEqual(op.routedUrl, "/entity/234");
+    strictEqual(op.$fullUrl, "/entity/234");
+    strictEqual(op.$routedUrl, "/entity/234");
+});
+
+testUtils.testWithUtils("routeUrl $fullUrl vs $routedUrl", null, true, function(methods, classes, subject, invoker) {
+    // arrange
+    var route = new wipeout.di.utils.routing.route("/entity/{id}/*");
+    
+    // act
+    var op = route.parse({
+        pathname: "/entity/234/blabla"
+    });
+    
+    // assert
+    strictEqual(op.$fullUrl, "/entity/234/blabla");
+    strictEqual(op.$routedUrl, "/entity/234/");
 });
 
 testUtils.testWithUtils("routeUrl partial 2", null, true, function(methods, classes, subject, invoker) {
@@ -61,7 +76,8 @@ testUtils.testWithUtils("routeUrl partial 2", null, true, function(methods, clas
     });
     
     // assert
-    strictEqual(op.routedUrl, "httpptc://www.sdm.something.com:2345/entity/234");
+    strictEqual(op.$fullUrl, "httpptc://www.sdm.something.com:2345/entity/234");
+    strictEqual(op.$routedUrl, "httpptc://www.sdm.something.com:2345/entity/234");
 });
 
 testUtils.testWithUtils("routeUrl full", null, true, function(methods, classes, subject, invoker) {
@@ -79,7 +95,8 @@ testUtils.testWithUtils("routeUrl full", null, true, function(methods, classes, 
     });
     
     // assert
-    strictEqual(op.routedUrl, "httpptc://www.sdm.something.com:2345/entity/234?entityName=ten#thsh");
+    strictEqual(op.$fullUrl, "httpptc://www.sdm.something.com:2345/entity/234?entityName=ten#thsh");
+    strictEqual(op.$routedUrl, "httpptc://www.sdm.something.com:2345/entity/234?entityName=ten#thsh");
 });
 
 testUtils.testWithUtils("exactMatch, missing port", null, true, function(methods, classes, subject, invoker) {

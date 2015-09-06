@@ -58,6 +58,18 @@
             }));
     };
     
+    route.buildParentRoute = function () {
+        if (this.route && this.route[0] === "~" && this.$domRoot) {
+            for (var i = 0, ii = this.$domRoot.renderContext.$parents.length; i < ii; i++) {
+                if (this.$domRoot.renderContext.$parents[i] instanceof route.constructor) {
+                    return this.$domRoot.renderContext.$parents[i].buildRoute();
+                }
+            }
+        }
+        
+        return null;
+    };
+    
     route.buildRoute = function () {
         
         if (!this.route || this.route[0] !== "~")
@@ -67,14 +79,17 @@
         if (this.$domRoot) {
             var i = 0;
             while (_route[0] === "~" && this.$domRoot.renderContext.$parents.length > i) {
-                if (this.$domRoot.renderContext.$parents[i] instanceof route.constructor)
+                if (this.$domRoot.renderContext.$parents[i] instanceof route.constructor) {
                     _route = this.$domRoot.renderContext.$parents[i].buildRoute() + _route.substr(1);
+                    break;
+                }
                 
                 i++;
             }
             
-            // remove /*/, */, /* and *
+            // remove //, /*/, */, /* and *
             _route = _route
+                .replace(/\/\//g, "/")
                 .replace(/\/\*\//g, "/")
                 .replace(/\*\//g, "/")
                 .replace(/\/\*/g, "/")
@@ -93,7 +108,7 @@
         this.$routeValues = $allValues;
         debugger;
         if (this.refreshModel())
-            this.$url(null, wipeout.settings.convertRouteUrlToDataUrl($allValues.routedUrl), true, (function (model) {
+            this.$url(null, wipeout.settings.convertRouteUrlToDataUrl($allValues.$fullUrl), true, (function (model) {
                 this.model = model;
                 this.synchronusTemplateChange(this.$cachedTemplateId);
             }).bind(this));

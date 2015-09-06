@@ -67,11 +67,11 @@ testUtils.testWithUtils("test 1", "with caps and non caps", true, function(metho
     
     // act
     // assert
-    strictEqual(route.parse("xYYYx").val, "YYY");
-    ok(!route.parse("YYYx"));
-    ok(!route.parse("xYYY"));
-    ok(!route.parse("zxYYYx"));
-    ok(!route.parse("xYYYxz"));
+    strictEqual(route.parse("xYYYx", "oahdad").val, "YYY");
+    ok(!route.parse("YYYx", "oahdad"));
+    ok(!route.parse("xYYY", "oahdad"));
+    ok(!route.parse("zxYYYx", "oahdad"));
+    ok(!route.parse("xYYYxz", "oahdad"));
 });
 
 testUtils.testWithUtils("test 2", "with regexp special characters", true, function(methods, classes, subject, invoker) {
@@ -80,10 +80,10 @@ testUtils.testWithUtils("test 2", "with regexp special characters", true, functi
     
     // act
     // assert
-    strictEqual(route.parse("YYY^").val, "YYY");
-    ok(!route.parse("YYY"));
-    strictEqual(route.parse("!YYY^").val, "!YYY");
-    ok(!route.parse("YYY^!"));
+    strictEqual(route.parse("YYY^", "oahdad").val, "YYY");
+    ok(!route.parse("YYY", "oahdad"));
+    strictEqual(route.parse("!YYY^", "oahdad").val, "!YYY");
+    ok(!route.parse("YYY^!", "oahdad"));
 });
 
 testUtils.testWithUtils("test 3, with url encoded chars", null, true, function(methods, classes, subject, invoker) {
@@ -92,10 +92,10 @@ testUtils.testWithUtils("test 3, with url encoded chars", null, true, function(m
     
     // act
     // assert
-    strictEqual(route.parse("xYY%20Y").val, "YY Y");
-    ok(!route.parse("YY%20Y"));
-    ok(!route.parse("zxYY%20Y"));
-    strictEqual(route.parse("xYY%20Yz").val, "YY Yz");
+    strictEqual(route.parse("xYY%20Y", "oahdad").val, "YY Y");
+    ok(!route.parse("YY%20Y", "oahdad"));
+    ok(!route.parse("zxYY%20Y", "oahdad"));
+    strictEqual(route.parse("xYY%20Yz", "oahdad").val, "YY Yz");
 });
 
 testUtils.testWithUtils("test 4", null, true, function(methods, classes, subject, invoker) {
@@ -104,9 +104,9 @@ testUtils.testWithUtils("test 4", null, true, function(methods, classes, subject
     
     // act
     // assert
-    strictEqual(route.parse("YYY").val, "YYY");
-    strictEqual(route.parse("YYYz").val, "YYYz");
-    strictEqual(route.parse("zYYY").val, "zYYY");
+    strictEqual(route.parse("YYY", "oahdad").val, "YYY");
+    strictEqual(route.parse("YYYz", "oahdad").val, "YYYz");
+    strictEqual(route.parse("zYYY", "oahdad").val, "zYYY");
 });
 
 testUtils.testWithUtils("no route val 1", null, true, function(methods, classes, subject, invoker) {
@@ -115,7 +115,7 @@ testUtils.testWithUtils("no route val 1", null, true, function(methods, classes,
     
     // act
     // assert
-    ok(!route.parse("xx"));
+    ok(!route.parse("xx", "oahdad"));
 });
 
 testUtils.testWithUtils("no route val 2", null, true, function(methods, classes, subject, invoker) {
@@ -124,7 +124,7 @@ testUtils.testWithUtils("no route val 2", null, true, function(methods, classes,
     
     // act
     // assert
-    ok(!route.parse("x"));
+    ok(!route.parse("x", "oahdad"));
 });
 
 testUtils.testWithUtils("no route val 3", null, true, function(methods, classes, subject, invoker) {
@@ -133,7 +133,7 @@ testUtils.testWithUtils("no route val 3", null, true, function(methods, classes,
     
     // act
     // assert
-    ok(!route.parse("x"));
+    ok(!route.parse("x", "oahdad"));
 });
 
 testUtils.testWithUtils("no route val 3", null, true, function(methods, classes, subject, invoker) {
@@ -142,7 +142,7 @@ testUtils.testWithUtils("no route val 3", null, true, function(methods, classes,
     
     // act
     // assert
-    ok(!route.parse(""));
+    ok(!route.parse("", "oahdad"));
 });
 
 testUtils.testWithUtils("Duplicate url value", null, true, function(methods, classes, subject, invoker) {
@@ -150,7 +150,7 @@ testUtils.testWithUtils("Duplicate url value", null, true, function(methods, cla
     // act
     // assert
     throws(function () {
-        new wipeout.di.utils.routing.routePart("/{val}/").parse("/xxx/", {val: true});
+        new wipeout.di.utils.routing.routePart("/{val}/").parse("/xxx/", "adasd", {val: true});
     });
 });
 
@@ -160,10 +160,10 @@ testUtils.testWithUtils("Compulsary and Non compulsary value", null, true, funct
     
     // act
     // assert
-    strictEqual(route.parse("/xxx//").val1, "xxx");
-    strictEqual(route.parse("/xxx//").val2, null);
-    strictEqual(route.parse("/xxx/xxx/").val2, "xxx");
-    strictEqual(route.parse("//xxx/"), null);
+    strictEqual(route.parse("/xxx//", "oahdad").val1, "xxx");
+    strictEqual(route.parse("/xxx//", "oahdad").val2, null);
+    strictEqual(route.parse("/xxx/xxx/", "oahdad").val2, "xxx");
+    strictEqual(route.parse("//xxx/", "oahdad"), null);
 });
 
 testUtils.testWithUtils("Exact and non exact match (beginning)", null, true, function(methods, classes, subject, invoker) {
@@ -175,10 +175,10 @@ testUtils.testWithUtils("Exact and non exact match (beginning)", null, true, fun
     
     // act
     // assert
-    ok(!route1.parse("zxyxyxy"));
-    ok(route2.parse("zxyxyxy"));
-    ok(!route3.parse("zxyxyxy"));
-    ok(route4.parse("zxyxyxy"));
+    ok(!route1.parse("zxyxyxy", "oahdad"));
+    ok(route2.parse("zxyxyxy", "oahdad"));
+    ok(!route3.parse("zxyxyxy", "oahdad"));
+    ok(route4.parse("zxyxyxy", "oahdad"));
 });
 
 testUtils.testWithUtils("Exact and non exact match (end)", null, true, function(methods, classes, subject, invoker) {
@@ -190,10 +190,10 @@ testUtils.testWithUtils("Exact and non exact match (end)", null, true, function(
     
     // act
     // assert
-    ok(!route1.parse("xyxyxyz"));
-    ok(route2.parse("xyxyxyz"));
-    ok(!route3.parse("xyxyxyz"));
-    ok(route4.parse("xyxyxyz"));
+    ok(!route1.parse("xyxyxyz", "oahdad"));
+    ok(route2.parse("xyxyxyz", "oahdad"));
+    ok(!route3.parse("xyxyxyz", "oahdad"));
+    ok(route4.parse("xyxyxyz", "oahdad"));
 });
 
 testUtils.testWithUtils("Exact and non exact match (beginning and end)", null, true, function(methods, classes, subject, invoker) {
@@ -205,8 +205,8 @@ testUtils.testWithUtils("Exact and non exact match (beginning and end)", null, t
     
     // act
     // assert
-    ok(!route1.parse("zxyxyxyz"));
-    ok(route2.parse("zxyxyxyz"));
-    ok(!route3.parse("zxyxyxyz"));
-    ok(route4.parse("zxyxyxyz"));
+    ok(!route1.parse("zxyxyxyz", "oahdad"));
+    ok(route2.parse("zxyxyxyz", "oahdad"));
+    ok(!route3.parse("zxyxyxyz", "oahdad"));
+    ok(route4.parse("zxyxyxyz", "oahdad"));
 });

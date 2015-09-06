@@ -126,17 +126,27 @@ Class("wipeout.di.utils.routing.routePart", function () {
         return output;
     };
     
-    routePart.prototype.parse = function (uriPart, values) {
+    routePart.prototype.parse = function (uriPart, partName, values) {
 		///<summary>Parse a string into values based on the route</summary>
         ///<param name="uriPart" type="String">The string to parse</param>
+        ///<param name="partName" type="String">The part of the url this is, e.g. protocol, path etc...</param>
         ///<param name="values" type="Object" optional="true">The object to append values to. If null, will create a new object</param>
         ///<returns type="Object">A dictionary of values, or null if the route part does not match</returns>
         
         // check no other route has assigned variables belonging to this
-        if (values) //TEST
-            for (var i in this.variables)
-                if (values.hasOwnProperty(i))
+        if (values) { //TEST
+            if (!values.$routedUrl) values.$routedUrl = {};
+            
+            for (var i in this.variables) {
+                if (values.hasOwnProperty(i)) {
                     throw "Duplicate url value for: \"" + i + "\".";
+                }
+            }
+        } else {
+            values = {$routedUrl: {}};
+        }
+        
+        values.$routedUrl[partName] = "";
         
         var routedVariables = {}, temp;
         for (var i = 0, ii = this.parts.length; i < ii; i++) {
@@ -147,6 +157,7 @@ Class("wipeout.di.utils.routing.routePart", function () {
                 if (!(temp = this.parts[i].exec(uriPart)) || temp.index !== 0)
                     return null;
                 
+                values.$routedUrl[partName] += uriPart.substr(0, temp[0].length);
                 uriPart = uriPart.substr(temp[0].length);
             } else {
                 if (i + 1 < ii) {
@@ -157,14 +168,14 @@ Class("wipeout.di.utils.routing.routePart", function () {
                 }
 
                 // get the value
-                routedVariables[this.parts[i]] = uriPart.substr(0, temp.index);
+                values.$routedUrl[partName] +=
+                    (routedVariables[this.parts[i]] = uriPart.substr(0, temp.index));
 
                 // remove value from route
                 uriPart = uriPart.substr(temp.index);
             }
         }
         
-        values = values || {};
         for (var i in this.variables) { //TEST
             if (this.variables[i].compulsary) {
                 if (!routedVariables.hasOwnProperty(i) || routedVariables[i] === "")

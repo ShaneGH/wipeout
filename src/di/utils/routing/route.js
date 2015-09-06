@@ -34,20 +34,27 @@ Class("wipeout.di.utils.routing.route", function () {
              (location.hash && !this.parts.hash)))
             return null;
         
-        var values = {};
+        var values;
         for (var part in this.parts)
-            if (!this.parts[part].parse(location[part], values))
+            if (!(values = this.parts[part].parse(location[part], part, values)))
                 return null;
         
-        values.routedUrl = (this.parts.protocol ? (location.protocol + "//") : "") +
+        if (values.$fullUrl) throw "Invalid route variable name \"$fullUrl\". This term is reserved.";
+        values.$fullUrl = (this.parts.protocol ? (location.protocol + "//") : "") +
             (this.parts.hostname ? location.hostname : "") +
             (this.parts.port ? (":" + location.port) : "") +
             (this.parts.pathname ? location.pathname : "") +
             (this.parts.search ? location.search : "") +
             (this.parts.hash ? location.hash : "");
         
-        if (values.$searchString)
-            throw "Invalid route variable name \"$searchString\". This term is reserved.";
+        values.$routedUrl = (this.parts.protocol ? (values.$routedUrl.protocol + "//") : "") +
+            (this.parts.hostname ? values.$routedUrl.hostname : "") +
+            (this.parts.port ? (":" + values.$routedUrl.port) : "") +
+            (this.parts.pathname ? values.$routedUrl.pathname : "") +
+            (this.parts.search ? values.$routedUrl.search : "") +
+            (this.parts.hash ? values.$routedUrl.hash : "");
+        
+        if (values.$searchString) throw "Invalid route variable name \"$searchString\". This term is reserved.";
         values.$searchString = route.compileSearchValues(location); //TODM
         
         return values;
