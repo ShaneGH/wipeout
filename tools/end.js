@@ -20,6 +20,10 @@ expose("addHtmlAttribute", SimpleHtmlAttr);
 
 expose("findFilters", wipeout.utils.find);
 
+//TODM
+expose("pushState", wipeout.di.services.$router.pushState);
+expose("replaceState", wipeout.di.services.$router.replaceState);
+
 // passing in a function from "bind" will break docs
 expose("triggerEvent", function triggerEvent (forObject, event, eventArgs) {
     ///<summary>Trigger an event.</summary>

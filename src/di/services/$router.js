@@ -8,6 +8,16 @@ Class("wipeout.di.services.$router", function () {
     var active = [];
     $router.onPopState = onPopState;
     
+    $router.pushState = function (data, title, url) {
+        history.pushState(data, title, url);
+        onPopState();
+    };
+    
+    $router.replaceState = function (data, title, url) {
+        history.replaceState(data, title, url);
+        onPopState();
+    };
+    
     function onPopState () {
         enumerateArr(active, function (router) {
             router.parse();
@@ -71,6 +81,7 @@ Class("wipeout.di.services.$router", function () {
         callback.args = wipeout.utils.jsParse.getArgumentNames(callback);
         callback.invokeIfValid = invokeIfValid;
         callback.unRoutedCallback = options && options.unRoutedCallback;
+        callback.context = options && options.context;
         
         if (options && options.executeImmediately) {
             var vals = this.routes[routeKey].parse(this.$location);
@@ -113,7 +124,7 @@ Class("wipeout.di.services.$router", function () {
             }
         }
         
-        this.apply(null, args);
+        this.apply(this.context, args);
         
         return this.hasControl = true;
     }

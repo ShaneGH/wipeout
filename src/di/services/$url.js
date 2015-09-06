@@ -9,6 +9,7 @@ Class("wipeout.di.services.$url", function () {
         }
         
         if (!urlCache[url]) {
+            //TODM: {} == model [] == global
             var urlFunc = [], 
                 open1 = /\{/g, 
                 close1 = /\}/g,

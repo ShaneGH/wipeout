@@ -36,7 +36,7 @@ testUtils.testWithUtils("constructor, parser and parts", null, true, function(me
     strictEqual(route.parts[4].toString(), "/z/i");
     strictEqual(route.parts[5], "val3");
     strictEqual(route.parts[6].toString(), "/a/i");
-    strictEqual(route.parts[7].toString(), "/$/");
+    strictEqual(route.parts[7].toString(), "/(\\/?)$/i");
     strictEqual(route.variables.val1.compulsary, true);
     strictEqual(route.variables.val1.parser, wo.parsers.string);
     strictEqual(route.variables.val2.compulsary, false);
@@ -56,7 +56,7 @@ testUtils.testWithUtils("constructor beginning and ending with variable", null, 
     strictEqual(route.parts[1], "val1");
     strictEqual(route.parts[2].toString(), "/y/i");
     strictEqual(route.parts[3], "val2");
-    strictEqual(route.parts[4].toString(), "/$/");
+    strictEqual(route.parts[4].toString(), "/(\\/?)$/i");
     strictEqual(route.variables.val1.compulsary, true);
     strictEqual(route.variables.val2.compulsary, false);
 });

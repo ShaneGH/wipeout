@@ -32,10 +32,16 @@ Class("wipeout.di.utils.routing.routePart", function () {
             // add static part
             staticPart = route.substr(0, tmp.index);
             if (!startExact) {
-                this.parts.push(new RegExp(".*" + wipeout.utils.obj.asRegExp.convert(staticPart), "i"));
+                this.parts.push({
+                    rx: true,
+                    val: ".*" + wipeout.utils.obj.asRegExp.convert(staticPart)
+                });
                 startExact = true;
             } else {
-                this.parts.push(wipeout.utils.obj.asRegExp.i(staticPart));
+                this.parts.push({
+                    rx: true,
+                    val: wipeout.utils.obj.asRegExp.convert(staticPart)
+                });
             }
 
             // get variable name
@@ -50,7 +56,10 @@ Class("wipeout.di.utils.routing.routePart", function () {
             this.variables[variable.name] = variable;
             
             // add variable name
-            this.parts.push(variable.name);
+            this.parts.push({
+                rx: false,
+                val: variable.name
+            });
             
             // prepare route for next loop
             route = route.substr(tmp.index + 1);
@@ -58,14 +67,39 @@ Class("wipeout.di.utils.routing.routePart", function () {
         
         if (route.length) {
             if (!startExact) {
-                this.parts.push(new RegExp(".*" + wipeout.utils.obj.asRegExp.convert(route), "i"));
+                this.parts.push({
+                    rx: true,
+                    val: ".*" + wipeout.utils.obj.asRegExp.convert(route)
+                });
             } else {
-                this.parts.push(wipeout.utils.obj.asRegExp.i(route));
+                this.parts.push({
+                    rx: true,
+                    val: wipeout.utils.obj.asRegExp.convert(route)
+                });
             }
         }
         
-        if (endExact)
-            this.parts.push(/$/);
+        // make very last / optional
+        
+        if (endExact) {
+            
+            // remove last / and add as optional part of ending
+            if (this.parts.length && this.parts[this.parts.length - 1].rx) {
+                var last = this.parts[this.parts.length - 1];
+                if (last.val[last.val.length - 1] === "/" && last.val[last.val.length - 2] === "\\") last.val = last.val.substr(0, last.val.length - 2);
+                
+                // remove empty value
+                if (!last.val.length) this.parts.length--;
+            }
+            
+            this.parts.push({ rx: true, val: "(\\/?)$" });
+        }
+        
+        for (var i = 0, ii = this.parts.length; i < ii; i++) {
+            this.parts[i] = this.parts[i].rx ?
+                new RegExp(this.parts[i].val, "i") :
+                this.parts[i].val;
+        }
     });
     
     var compulsary = /^\*/;

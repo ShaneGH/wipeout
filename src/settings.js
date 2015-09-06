@@ -27,6 +27,11 @@ Class("wipeout.settings", function() {
     settings.asyncModuleRoot = "";
     
     //TODM
+    settings.convertRouteUrlToDataUrl = function (routeUrl) {
+        return routeUrl;
+    };
+    
+    //TODM
     settings.convertTemplateToUrl = function (template) {
         return template;
     };
